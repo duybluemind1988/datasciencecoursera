@@ -1,0 +1,136 @@
+---
+title: "Data_science"
+output: html_document
+---
+# R Programming Week 2
+# Programming Assignment 1 INSTRUCTIONS: Air Pollution
+
+```{r}
+path <- "specdata"
+```
+
+```{r}
+mydir = "specdata"
+myfiles = list.files(path=mydir, pattern="*.csv", full.names=TRUE)
+myfiles
+```
+```{r}
+myfiles[1:10]
+```
+
+```{r}
+library(plyr)
+dat_csv = ldply(myfiles, read_csv)
+dat_csv
+```
+```{r}
+dat_csv %>% select(sulfate) %>% colMeans( na.rm = TRUE)
+```
+
+```{r}
+library(readr)
+X001 <- read_csv("specdata/001.csv")
+X001
+```
+```{r}
+count(X001,na.rm=T)
+dim(X001)[1]
+```
+
+
+```{r}
+cbind(path,3,1)
+```
+
+Part 1
+Write a function named 'pollutantmean' that calculates the mean of a pollutant (sulfate or nitrate) across a specified list of monitors. The function 'pollutantmean' takes three arguments: 'directory', 'pollutant', and 'id'. Given a vector monitor ID numbers, 'pollutantmean' reads that monitors' particulate matter data from the directory specified in the 'directory' argument and returns the mean of the pollutant across all of the monitors, ignoring any missing values coded as NA. A prototype of the function is as follows
+```{r}
+library(plyr)
+library(tidyverse)
+pollutantmean <- function(directory, pollutant, id = 1:332){
+  
+  myfiles = list.files(path=directory, pattern="*.csv", full.names=TRUE)[id]
+  dat_csv = plyr::ldply(myfiles, read_csv) # read and combine
+  dat_csv%>% select(pollutant) %>% colMeans( na.rm = TRUE)
+}
+```
+
+
+```{r}
+pollutantmean("specdata", "sulfate", 1:10)
+```
+
+```{r}
+pollutantmean("specdata", "nitrate", 70:72)
+```
+
+```{r}
+pollutantmean <- function(directory, pollutant, id = 1:332) {
+     ## obtaining the required files by storing them into mydata variable
+     mydata <- list.files(path = directory,pattern="*.csv", full.names=TRUE)[id]
+     ## reading the .csv files of mydata
+     readfiles <- lapply(mydata, read.csv)
+     ## combine all the files into one file so that we can calculate the mean at once
+     combine <- do.call(rbind,readfiles)
+     ##calculate the mean without the NA values
+     mean(combine[,pollutant], na.rm = TRUE)
+}
+```
+
+```{r}
+pollutantmean("specdata", "nitrate", 70:72)
+```
+
+Part 2
+Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases. A prototype of this function follows
+```{r}
+complete <- function(directory, id = 1:332){
+  
+  myfiles = list.files(path=directory, pattern="*.csv", full.names=TRUE)
+  for (i in id){
+    data <- read_csv(myfiles[i])
+    print(i)
+    print(dim(data)[1])
+  }
+}
+```
+
+
+```{r}
+complete("specdata", 30:25)
+```
+
+
+```{r}
+complete <- function(directory, id = 1:332) {
+     ## obtaining the required files by storing them into mydata variable
+     mydata <- list.files(path =directory,pattern="*.csv", full.names=TRUE)[id]
+     ## create an empty vector
+     frows <- c()
+     counter <- 1
+     for(file_name in mydata) {
+          ## storing each .csv file without the NA values into fineobject variable
+          fineobject <- na.omit(read.csv(file_name))
+          ## store the number of the fineobject rows in the empty f(ine)rows vector
+          frows[counter] <- nrow(fineobject)
+          counter <- counter + 1
+     }
+      ## creating and printing the f(ine)list
+      flist <- data.frame("id" = id, "nobs" = frows)
+      print(flist)
+}
+
+```
+
+```{r}
+complete("specdata", 30:25)
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
