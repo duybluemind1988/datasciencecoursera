@@ -1,6 +1,7 @@
 
 # Load activity labels + features
-path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/"
+# path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/"
+path <- getwd()
 activityLabels <- fread(file.path(path, "UCI HAR Dataset/activity_labels.txt")
                         , col.names = c("classLabels", "activityName"))
 features <- fread(file.path(path, "UCI HAR Dataset/features.txt")
