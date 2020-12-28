@@ -4,7 +4,7 @@ Author: Nguyen Ngoc Duy
 
 Data Zip File Location: UC Irvine Repo
 
-Goal of this project:
+## Goal of this project:
 
 1. Merges the training and the test sets to create one data set.
 2. Extracts only the measurements on the mean and standard deviation for each measurement. 
@@ -12,7 +12,7 @@ Goal of this project:
 4. Appropriately labels the data set with descriptive variable names. 
 5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
-Review criteria:
+## Review criteria:
 
 1. The submitted data set is tidy. 
 2. The Github repo contains the required scripts.
