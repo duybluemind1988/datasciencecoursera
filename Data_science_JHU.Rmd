@@ -721,9 +721,7 @@ dim(data)
 ```
 
 ```{r}
-data[30]
-data[80]
-data[32400]
+quantile(data, probs = c(0.3, 0.8) )
 ```
 
 
@@ -735,8 +733,8 @@ download.file(fileUrl,destfile="FEDSTATS_Country.csv")
 ```
 
 ```{r}
-countries <- read.csv("FGDP.csv")
-education <- read.csv("FEDSTATS_Country.csv")
+countries <- read.csv("FGDP.csv",stringsAsFactors = FALSE)
+education <- read.csv("FEDSTATS_Country.csv",stringsAsFactors = FALSE)
 ```
 
 ```{r}
@@ -746,6 +744,7 @@ head(education)
 
 ```{r}
 mergedData <- merge (countries, education, by.x="X",by.y="CountryCode")
+dim(mergedData)
 mergedData
 ```
 
@@ -767,6 +766,226 @@ dim(mergedData)
 3. F 234 matches, 13th country is Spain
 4. F 23.966667, 30.91304
 5. F 3
+```{r}
+FGDP <- data.table::fread('https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv'
+                          , skip=4
+                          , nrows = 190
+                          , select = c(1, 2, 4, 5)
+                          , col.names=c("CountryCode", "Rank", "Economy", "Total")
+                          )
+
+# Download data and read FGDP data into data.table
+FEDSTATS_Country <- data.table::fread('https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv')
+```
+```{r}
+FGDP
+FEDSTATS_Country
+```
+
+
+```{r}
+mergedDT <- merge(FGDP, FEDSTATS_Country, by = 'CountryCode')
+
+# How many of the IDs match?
+nrow(mergedDT)
+```
+
+
+```{r}
+
+# Sort the data frame in descending order by GDP rank (so United States is last). 
+# What is the 13th country in the resulting data frame?
+mergedDT[order(-Rank)][13,.(Economy)]
+```
+```{r}
+mergedDT
+```
+```{r}
+mergedDT[`Income Group` == "High income: OECD"
+         , lapply(.SD, mean)]
+```
+
+```{r}
+# "High income: OECD" 
+mergedDT[`Income Group` == "High income: OECD"
+         , lapply(.SD, mean) # apply to subset , get mean (by Income group)
+         , .SDcols = c("Rank")
+         , by = "Income Group"]
+```
+
+
+```{r}
+# "High income: nonOECD"
+mergedDT[`Income Group` == "High income: nonOECD"
+         , lapply(.SD, mean)
+         , .SDcols = c("Rank")
+         , by = "Income Group"]
+```
+
+
+```{r}
+breaks <- quantile(mergedDT[, Rank], probs = seq(0, 1, 0.2), na.rm = TRUE)
+breaks
+```
+
+
+```{r}
+mergedDT$quantileGDP <- cut(mergedDT[, Rank], breaks = breaks)
+mergedDT$quantileGDP
+```
+
+```{r}
+mergedDT[`Income Group` == "Lower middle income", .N, by = c("Income Group", "quantileGDP")]
+```
+# Text regression
+
+```{r}
+data <- read.csv("getdata%2Fdata%2Fss06hid.csv")
+data
+```
+
+
+```{r}
+names(data)
+```
+
+
+```{r}
+#strsplit(names(data),"wgtp")
+```
+
+
+```{r}
+data <- read.csv("FGDP.csv",skip=4,nrows = 190)
+data
+```
+```{r}
+dim(data)
+head(data)
+```
+
+
+```{r}
+library(stringr)
+data$X.4<-str_replace_all(data$X.4, ",", "")
+data$X.4 <- as.integer(data$X.4)
+head(data$X.4)
+data$X.4
+```
+
+
+```{r}
+mean(data$X.4,na.rm=T)
+```
+
+
+```{r}
+countryNames <- data$X.3
+grep("^United",countryNames)
+```
+
+
+```{r}
+FGDP <- data.table::fread('https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv'
+                          , skip=4
+                          , nrows = 190)
+
+# Download data and read FGDP data into data.table
+FEDSTATS_Country <- data.table::fread('https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv')
+```
+```{r}
+head(FGDP)
+head(FEDSTATS_Country)
+```
+
+
+```{r}
+mergedDT <- merge(FGDP, FEDSTATS_Country, by.x = 'V1',by.y="CountryCode")
+dim(mergedDT)
+```
+
+
+```{r}
+mergedDT
+```
+```{r}
+Special_Notes <- mergedDT$`Special Notes`
+grep("Fiscal year end: June 30;",Special_Notes)
+```
+```{r}
+length(grep("Fiscal year end: June 30;",Special_Notes))
+```
+
+
+```{r}
+mergedDT$`Special Notes`
+```
+
+
+```{r}
+library(quantmod)
+amzn = getSymbols("AMZN",auto.assign=FALSE)
+sampleTimes = index(amzn)
+```
+
+
+```{r}
+head(sampleTimes)
+tail(sampleTimes)
+```
+
+
+```{r}
+class(sampleTimes)
+summary(sampleTimes)
+```
+
+```{r}
+table(year(sampleTimes))
+```
+
+
+```{r}
+# install.packages("quantmod")
+library("quantmod")
+amzn <- getSymbols("AMZN",auto.assign=FALSE)
+sampleTimes <- index(amzn) 
+timeDT <- data.table::data.table(timeCol = sampleTimes)
+
+# How many values were collected in 2012? 
+timeDT[(timeCol >= "2012-01-01") & (timeCol) < "2013-01-01", .N ]
+# Answer: 
+# 250
+
+# How many values were collected on Mondays in 2012?
+timeDT[((timeCol >= "2012-01-01") & (timeCol < "2013-01-01")) & (weekdays(timeCol) == "Monday"), .N ]
+# Answer:
+# 47
+```
+
+# Peer-graded Assignment: Getting and Cleaning Data Course Project
+```{r}
+path <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+download.file(path,destfile="Human_activity_smartphone_dataset.zip")
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
 ```{r}
 ```
 
