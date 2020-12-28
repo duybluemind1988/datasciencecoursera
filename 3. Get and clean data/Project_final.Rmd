@@ -2,3 +2,201 @@
 title: "Project"
 output: html_document
 ---
+# Peer-graded Assignment: Getting and Cleaning Data Course Project
+
+```{r}
+library(data.table)
+getwd()
+```
+
+
+```{r}
+# Load activity labels + features
+path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/"
+activityLabels <- fread(file.path(path, "UCI HAR Dataset/activity_labels.txt")
+                        , col.names = c("classLabels", "activityName"))
+activityLabels
+```
+
+
+```{r}
+features <- fread(file.path(path, "UCI HAR Dataset/features.txt")
+                  , col.names = c("index", "featureNames"))
+features
+```
+
+
+```{r}
+# Extracts only the measurements on the mean and standard deviation for each measurement. 
+featuresWanted <- grep("(mean|std)\\(\\)", features[, featureNames])
+featuresWanted
+```
+```{r}
+length(featuresWanted)
+```
+
+
+```{r}
+measurements <- features[featuresWanted, featureNames]
+measurements
+```
+
+
+```{r}
+measurements <- gsub('[()]', '', measurements)
+measurements
+```
+
+# Load train datasets
+```{r}
+# Load train datasets
+train <- fread(file.path(path, "UCI HAR Dataset/train/X_train.txt"))[, featuresWanted, with = FALSE]
+train
+# only 66 columns with features wanted
+```
+
+```{r}
+fread(file.path(path, "UCI HAR Dataset/train/X_train.txt"))
+# Full set: 561 column
+```
+
+
+```{r}
+data.table::setnames(train, colnames(train), measurements)
+```
+
+
+```{r}
+train
+```
+
+
+```{r}
+trainActivities <- fread(file.path(path, "UCI HAR Dataset/train/y_train.txt")
+                       , col.names = c("Activity"))
+trainActivities
+```
+
+
+```{r}
+#  Each row identifies the subject who performed the activity for each window sample. Its range is from 1 to 30. 
+trainSubjects <- fread(file.path(path, "UCI HAR Dataset/train/subject_train.txt")
+                       , col.names = c("SubjectNum"))
+trainSubjects
+```
+```{r}
+train <- cbind(trainSubjects, trainActivities, train)
+train
+```
+# Load test datasets
+```{r}
+test <- fread(file.path(path, "UCI HAR Dataset/test/X_test.txt"))[, featuresWanted, with = FALSE]
+data.table::setnames(test, colnames(test), measurements)
+test
+```
+
+
+```{r}
+testActivities <- fread(file.path(path, "UCI HAR Dataset/test/y_test.txt")
+                        , col.names = c("Activity"))
+testActivities
+```
+
+
+```{r}
+testSubjects <- fread(file.path(path, "UCI HAR Dataset/test/subject_test.txt")
+                      , col.names = c("SubjectNum"))
+testSubjects
+```
+
+
+```{r}
+test <- cbind(testSubjects, testActivities, test)
+test
+```
+
+```{r}
+# merge datasets
+combined <- rbind(train, test)
+combined
+```
+
+
+```{r}
+activityLabels[["classLabels"]]
+activityLabels[["activityName"]]
+```
+
+```{r}
+# Convert classLabels to activityName basically. More explicit. 
+combined[["Activity"]] <- factor(combined[, Activity]
+                              , levels = activityLabels[["classLabels"]]
+                              , labels = activityLabels[["activityName"]])
+combined[["SubjectNum"]] <- as.factor(combined[, SubjectNum])
+combined
+```
+
+```{r}
+# The melt function takes data in wide format and stacks a set of columns into a single column of data
+combined <- reshape2::melt(data = combined, id = c("SubjectNum", "Activity"))
+combined
+```
+
+```{r}
+combined <- reshape2::dcast(data = combined, SubjectNum + Activity ~ variable, fun.aggregate = mean)
+combined
+```
+
+```{r}
+data.table::fwrite(x = combined, file = "tidyData.txt", quote = FALSE)
+```
+
+# Learn about dcast and melt
+```{r}
+# NOT RUN {
+ChickWeight = as.data.table(ChickWeight)
+setnames(ChickWeight, tolower(names(ChickWeight)))
+ChickWeight
+```
+
+
+```{r}
+DT <- melt(as.data.table(ChickWeight), id=2:4) # calls melt.data.table
+DT
+```
+```{r}
+# dcast is an S3 method in data.table from v1.9.6
+dcast(DT, time ~ variable, fun=mean) # using partial matching of argument
+dcast(DT, diet ~ variable, fun=mean)
+dcast(DT, diet+chick ~ time, drop=FALSE)
+dcast(DT, diet+chick ~ time, drop=FALSE, fill=0)
+```
+```{r}
+# using subset
+dcast(DT, chick ~ time, fun=mean, subset=.(time < 10 & chick < 20))
+```
+
+
+```{r}
+# drop argument, #1512
+DT <- data.table(v1 = c(1.1, 1.1, 1.1, 2.2, 2.2, 2.2),
+                 v2 = factor(c(1L, 1L, 1L, 3L, 3L, 3L), levels=1:3),
+                 v3 = factor(c(2L, 3L, 5L, 1L, 2L, 6L), levels=1:6),
+                 v4 = c(3L, 2L, 2L, 5L, 4L, 3L))
+DT
+```
+
+
+```{r}
+# drop=TRUE
+dcast(DT, v1 + v2 ~ v3)   
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
