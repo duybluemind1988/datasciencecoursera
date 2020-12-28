@@ -968,6 +968,102 @@ timeDT[((timeCol >= "2012-01-01") & (timeCol < "2013-01-01")) & (weekdays(timeCo
 path <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 download.file(path,destfile="Human_activity_smartphone_dataset.zip")
 ```
+```{r}
+library(data.table)
+getwd()
+```
+
+
+```{r}
+# Load activity labels + features
+path <- "C:/Users/DNN/Data_science/Git/"
+activityLabels <- fread(file.path(path, "UCI HAR Dataset/activity_labels.txt")
+                        , col.names = c("classLabels", "activityName"))
+activityLabels
+```
+
+
+```{r}
+features <- fread(file.path(path, "UCI HAR Dataset/features.txt")
+                  , col.names = c("index", "featureNames"))
+features
+```
+
+
+```{r}
+# Extracts only the measurements on the mean and standard deviation for each measurement. 
+featuresWanted <- grep("(mean|std)\\(\\)", features[, featureNames])
+featuresWanted
+```
+```{r}
+length(featuresWanted)
+```
+
+
+```{r}
+measurements <- features[featuresWanted, featureNames]
+measurements
+```
+
+
+```{r}
+measurements <- gsub('[()]', '', measurements)
+measurements
+```
+
+# Load train datasets
+```{r}
+# Load train datasets
+train <- fread(file.path(path, "UCI HAR Dataset/train/X_train.txt"))[, featuresWanted, with = FALSE]
+train
+# only 66 columns with features wanted
+```
+
+```{r}
+fread(file.path(path, "UCI HAR Dataset/train/X_train.txt"))
+# Full set: 561 column
+```
+
+
+```{r}
+data.table::setnames(train, colnames(train), measurements)
+```
+
+
+```{r}
+train
+```
+
+
+```{r}
+trainActivities <- fread(file.path(path, "UCI HAR Dataset/train/Y_train.txt")
+                       , col.names = c("Activity"))
+trainActivities
+```
+
+
+```{r}
+#  Each row identifies the subject who performed the activity for each window sample. Its range is from 1 to 30. 
+trainSubjects <- fread(file.path(path, "UCI HAR Dataset/train/subject_train.txt")
+                       , col.names = c("SubjectNum"))
+trainSubjects
+```
+```{r}
+train <- cbind(trainSubjects, trainActivities, train)
+train
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
 
 
 ```{r}
