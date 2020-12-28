@@ -128,10 +128,650 @@ complete("specdata", 30:25)
 ```
 Part 3
 Write a function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold. The function should return a vector of correlations for the monitors that meet the threshold requirement. If no monitors meet the threshold requirement, then the function should return a numeric vector of length 0. A prototype of this function follows
+```{r}
+corr<-function(directory,threshold=0){
+  #create list of file names
+  filesD<-list.files(directory,full.names = TRUE)
+  
+  #create empty vector
+  dat <- vector(mode = "numeric", length = 0)
+  
+  for(i in 1:length(filesD)){
+    #read in file
+    temp<- read.csv(filesD[i],header=TRUE)
+    #delete NAs
+    temp<-temp[complete.cases(temp),]
+    #count the number of observations
+    csum<-nrow(temp)
+    #if the number of rows is greater than the threshold
+    if(csum>threshold){
+      #for that file you find the correlation between nitrate and sulfate
+      #combine each correlation for each file in vector format using the concatenate function 
+      #since this is not a data frame we cannot use rbind or cbind
+      dat<-c(dat,cor(temp$nitrate,temp$sulfate))
+    }
+    
+  }
+  
+  return(dat)
+}
+```
+
+# Programming Assignment 3
+
+# 1 Plot the 30-day mortality rates for heart attack
+```{r}
+library(tidyverse)
+outcome <- read.csv("~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv")
+head(outcome)
+```
+
+```{r}
+outcome[, 11] <- as.numeric(outcome[, 11])
+```
+
+To make a simple histogram of the 30-day death rates from heart attack (column 11 in the outcome dataset),run
+```{r}
+hist(outcome[, 11])
+```
+```{r}
+# install.packages("data.table")
+library("data.table")
+
+# Reading in data
+outcome <- data.table::fread('~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv')
+outcome[, (11) := lapply(.SD, as.numeric), .SDcols = (11)]
+outcome[, lapply(.SD
+                 , hist
+                 , xlab= "Deaths"
+                 , main = "Hospital 30-Day Death (Mortality) Rates from Heart Attack"
+                 , col="lightblue")
+        , .SDcols = (11)]
+
+```
+
+# 2 Finding the best hospital in a state
+
+```{r}
+outcome <- "heart attack"
+state <- "TX"
+```
+
+```{r}
+	## All of the possible outcome strings
+	outcomes = c("heart attack", "heart failure", "pneumonia")
+
+    ## Check if outcome is one of the strings in outcomes
+	## %in% is a more intuitive interface as a binary operator, which returns a logical vector indicating if there is a match or not
+    if( outcome %in% outcomes == FALSE ) {
+    	stop("invalid outcome")
+    }
+```
+
+
+```{r}
+## Read outcome data
+	data <- read.csv("~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv", colClasses = "character")
+
+	## Get the columns below from 'data' and place it in 'data' with new names ("name", "state", "heart attack", etc)
+	#"Hospital.Name"                                              
+	#"State"                                                     
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"  
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"    
+
+	data <- data[c(2, 7, 11, 17, 23)]
+	names(data)[1] <- "name"
+	names(data)[2] <- "state"
+	names(data)[3] <- "heart attack"
+	names(data)[4] <- "heart failure"
+	names(data)[5] <- "pneumonia"
+```
+
+
+```{r}
+data
+```
+
+
+```{r}
+    ## Get a vector of all of the states in 'data' now at column 2, NOTE: could've also used data["state"]
+    states <- data[, 2]
+    states <- unique(states)
+    if( state %in% states == FALSE ) {
+    	stop("invalid state")
+    }
+```
+
+
+```{r}
+## Get only the rows with our state value	
+data <- data[data$state==state & data[outcome] != 'Not Available', ]
+data
+```
+
+
+```{r}
+vals <- data[, outcome]
+vals
+```
+
+
+```{r}
+## RowNum = the index of the minimum value 
+rowNum <- which.min(vals)
+rowNum
+```
+
+```{r}
+data[rowNum, ]$name
+```
+
+
+```{r}
+## Read outcome data
+	data <- read.csv("~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv", colClasses = "character")
+
+	## Get the columns below from 'data' and place it in 'data' with new names ("name", "state", "heart attack", etc)
+	#"Hospital.Name"                                              
+	#"State"                                                     
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"  
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"    
+
+	data <- data[c(2, 7, 11, 17, 23)]
+	names(data)[1] <- "name"
+	names(data)[2] <- "state"
+	names(data)[3] <- "heart attack"
+	names(data)[4] <- "heart failure"
+	names(data)[5] <- "pneumonia"
+data
+```
+```{r}
+state
+```
+```{r}
+best <- function(state, outcome) {
+	
+	## All of the possible outcome strings
+	outcomes = c("heart attack", "heart failure", "pneumonia")
+
+    ## Check if outcome is one of the strings in outcomes
+	## %in% is a more intuitive interface as a binary operator, which returns a logical vector indicating if there is a match or not
+    if( outcome %in% outcomes == FALSE ) {
+    	stop("invalid outcome")
+    }
+
+	## Read outcome data
+	 data <- read.csv("~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv", colClasses = "character")
+	## Get the columns below from 'data' and place it in 'data' with new names ("name", "state", "heart attack", etc)
+	#"Hospital.Name"                                              
+	#"State"                                                     
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Heart.Attack"  
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Heart.Failure"
+    #"Hospital.30.Day.Death..Mortality..Rates.from.Pneumonia"    
+
+	data <- data[c(2, 7, 11, 17, 23)]
+	names(data)[1] <- "name"
+	names(data)[2] <- "state"
+	names(data)[3] <- "heart attack"
+	names(data)[4] <- "heart failure"
+	names(data)[5] <- "pneumonia"
+
+    ## Get a vector of all of the states in 'data' now at column 2, NOTE: could've also used data["state"]
+    states <- data[, 2]
+    states <- unique(states)
+    if( state %in% states == FALSE ) {
+    	stop("invalid state")
+    }
+
+    ## Get only the rows with our state value	
+    data <- data[data$state==state & data[outcome] != 'Not Available', ]
+    vals <- data[, outcome]
+
+    ## RowNum = the index of the minimum value 
+    rowNum <- which.min(vals)
+	
+	## Return hospital name in that state with lowest 30-day death rate
+    data[rowNum, ]$name
+}
+```
+
+```{r}
+best("TX", "heart failure")
+```
+```{r}
+best("AK", "pneumonia")
+```
+
+```{r}
+rankhospital <- function(state, outcome, num) {
+    
+    
+    ## Read outcome data .csv file
+    data <- read.csv("~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv", colClasses = "character")
+    data <- data[c(2, 7, 11, 17, 23)]
+    names(data)[1] <- "name"
+    names(data)[2] <- "state"
+    names(data)[3] <- "heart attack"
+    names(data)[4] <- "heart failure"
+    names(data)[5] <- "pneumonia"
+
+    ## All of the possible outcome strings
+    outcomes = c("heart attack", "heart failure", "pneumonia")
+    ## Check if outcome is one of the strings in outcomes
+    if( outcome %in% outcomes == FALSE ) {
+    	stop("invalid outcome")
+    }
+
+    ## Validate the state string
+    ## All of the possible states from the data
+    states <- data[, 2]
+    states <- unique(states)
+    ## Check if state is one of the states in the data
+    if( state %in% states == FALSE ) {
+    	stop("invalid state")
+    }
+    
+    ## Validate the num value by checking if it is "best","worst", or a number.
+    ## NOTE: If num was Boolean then num%%1 = 0
+    if( num != "best" && num != "worst" && num%%1 != 0 ) {
+    	stop("invalid num")
+    }
+
+    ## Get only the rows with our state value    
+    data <- data[data$state==state & data[outcome] != 'Not Available', ]
+
+    ## Order the data by name and then outcome
+    data[outcome] <- as.data.frame(sapply(data[outcome], as.numeric))
+    data <- data[order(data$name, decreasing = FALSE), ]
+    data <- data[order(data[outcome], decreasing = FALSE), ]
+
+    ## Process the num argument to get the row index
+    vals <- data[, outcome]
+    if( num == "best" ) {
+        rowNum <- which.min(vals)
+    } else if( num == "worst" ) {
+        rowNum <- which.max(vals)
+    } else {
+        rowNum <- num
+    }
+
+    ## Return hospital name in that state with lowest 30-day death rate
+    data[rowNum, ]$name
+}
+```
+
+
+```{r}
+rankhospital("TX", "heart failure", "best")
+```
+```{r}
+rankhospital("NY", "heart attack", 7)
+```
+
+
+```{r}
+rankall <- function(outcome, num = "best") {
+    ## Read outcome data
+    data <- read.csv("~/Data_science/R_studio/Git/datasciencecoursera/2. R_Programming/ProgAssignment3_data/outcome-of-care-measures.csv", colClasses = "character")
+    data <- data[c(2, 7, 11, 17, 23)]
+    names(data)[1] <- "name"
+    names(data)[2] <- "state"
+    names(data)[3] <- "heart attack"
+    names(data)[4] <- "heart failure"
+    names(data)[5] <- "pneumonia"
+
+    ## Validate the outcome string
+    outcomes = c("heart attack", "heart failure", "pneumonia")
+    if( outcome %in% outcomes == FALSE ) stop("invalid outcome")
+
+    ## Validate the num value
+    if( num != "best" && num != "worst" && num%%1 != 0 ) stop("invalid num")
+
+    ## Grab only rows with data in our outcome
+    data <- data[data[outcome] != 'Not Available', ]
+    
+    ## Order the data
+    data[outcome] <- as.data.frame(sapply(data[outcome], as.numeric))
+    data <- data[order(data$name, decreasing = FALSE), ]
+    data <- data[order(data[outcome], decreasing = FALSE), ]
+
+    ## Helper functiont to process the num argument
+    getHospByRank <- function(df, s, n) {
+        df <- df[df$state==s, ]
+        vals <- df[, outcome]
+        if( n == "best" ) {
+            rowNum <- which.min(vals)
+        } else if( n == "worst" ) {
+            rowNum <- which.max(vals)
+        } else {
+            rowNum <- n
+        }
+        df[rowNum, ]$name
+    }
+    
+    ## For each state, find the hospital of the given rank
+    states <- data[, 2]
+    states <- unique(states)
+    newdata <- data.frame("hospital"=character(), "state"=character())
+    for(st in states) {
+        hosp <- getHospByRank(data, st, num)
+        newdata <- rbind(newdata, data.frame(hospital=hosp, state=st))
+    }
+
+    ## Return a data frame with the hospital names and the (abbreviated) state name
+    newdata <- newdata[order(newdata['state'], decreasing = FALSE), ]
+    newdata
+}
+```
+
+```{r}
+head(rankall("heart attack", 20), 10)
+```
+```{r}
+ tail(rankall("pneumonia", "worst"), 3)
+```
+```{r}
+r <- rankall("heart attack", 4)
+as.character(subset(r, state == "HI")$hospital)
+```
+```{r}
+r <- rankall("pneumonia", "worst")
+as.character(subset(r, state == "NJ")$hospital)
+```
+```{r}
+r <- rankall("heart failure", 10)
+as.character(subset(r, state == "NV")$hospital)
+```
+
+# 3. Get and clean data
+```{r}
+library(tidyverse)
+```
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+download.file(fileUrl,destfile="getdata%2Fdata%2Fss06hid.csv")
+```
+
+
+```{r}
+data <-read_csv("getdata%2Fdata%2Fss06hid.csv")
+data
+```
+
+
+```{r}
+data %>% filter(VAL >=24 & !is.na(VAL))
+```
+
+
+```{r}
+nrow(data %>% filter(VAL >=24))
+```
+
+
+```{r}
+str(data)
+```
+
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FDATA.gov_NGAP.xlsx"
+download.file(fileUrl,destfile="getdata%2Fdata%2FDATA.gov_NGAP.xlsx")
+```
+
+```{r}
+data <-read_excel("getdata%2Fdata%2FDATA.gov_NGAP.xlsx",col_names = FALSE)
+data
+```
+```{r}
+dat <-read_excel("getdata%2Fdata%2FDATA.gov_NGAP.xlsx",col_names = TRUE,skip=17,n_max=5)
+dat
+```
+
+```{r}
+sum(dat$Zip*dat$Ext,na.rm=T)
+```
+
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml"
+download.file(fileUrl,destfile="getdata%2Fdata%2Frestaurants.xml")
+```
+
+
+```{r}
+library(XML)
+# the contents of sample.xml are parsed 
+res <- xmlParse(file = "getdata%2Fdata%2Frestaurants.xml") 
+print(res) 
+```
+
+
+```{r}
+# Exract the root node. 
+rootnode <- xmlRoot(res) 
+rootnode
+```
+
+```{r}
+rootnode[[1]][[1]]
+```
+
+```{r}
+rootnode[[1]][[1]]["zipcode"]
+```
+
+```{r}
+# number of nodes in the root. 
+nodes <- xmlSize(rootnode) 
+nodes
+```
+
+```{r}
+# get entire contents of a record 
+second_node <- rootnode[2] 
+second_node
+```
+
+# My SQL
+```{r}
+#install.packages("RMySQL")
+library(RMySQL)
+```
+
+
+```{r}
+library(DBI)
+library(odbc)
+```
+
+```{r}
+ucscDb <-dbConnect(MySQL(),user="genome",host="genome-mysql.cse.ucsc.edu")
+result <-dbGetQuery(ucscDb,"show databases;")
+```
+
+
+```{r}
+result
+```
+
+
+```{r}
+dbDisconnect(ucscDb)
+```
+
+
+```{r}
+hg19 <-dbConnect(MySQL(),user="genome",db="hg19",host="genome-mysql.cse.ucsc.edu")
+allTables <- dbListTables(hg19)
+```
+
+```{r}
+length(allTables)
+```
+
+
+```{r}
+allTables[1:5]
+```
+
+
+```{r}
+dbGetQuery(hg19,"select count(*) from affyU133Plus2")
+```
+
+
+```{r}
+affyData < dbReadTable(hg19,"affyU133Plus2")
+affyData
+```
+```{r}
+install.packages("rhdf5")
+library(rhdf5)
+```
 
 
 ```{r}
 
+library(rhdf5)
+```
+
+
+```{r}
+con=url("http://biostat.jhsph.edu/~jleek/contact.html")
+htmlCode= readLines(con)
+close(con)
+htmlCode
+```
+
+
+```{r}
+nchar(htmlCode[10])
+nchar(htmlCode[20])
+nchar(htmlCode[30])
+nchar(htmlCode[100])
+```
+
+
+```{r}
+url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fwksst8110.for"
+
+```
+
+
+```{r}
+read_csv("getdata_wksst8110.for",skip = 1)
+```
+
+
+```{r}
+library(reshape2)
+head(mtcars)
+dim(mtcars)
+```
+
+```{r}
+mtcars$carname <- rownames(mtcars)
+mtcars$carname
+```
+
+
+```{r}
+carMelt <- melt(mtcars,id=c("carname","gear","cyl"),measure.vars=c("mpg","hp"))
+carMelt
+```
+
+
+```{r}
+cylData <- dcast(carMelt, cyl ~ variable)
+cylData
+```
+# Course 3 Week 3 Quiz
+```{r}
+library(tidyverse)
+```
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+download.file(fileUrl,destfile="getdata%2Fdata%2Fss06hid.csv")
+```
+
+```{r}
+data <- read.csv("getdata%2Fdata%2Fss06hid.csv")
+data
+```
+
+
+```{r}
+# ACR = 3
+# AGS = 6
+agricultureLogical <- (data$ACR ==3 & data$AGS ==6)
+which(agricultureLogical ==TRUE)
+```
+
+```{r}
+library(jpeg)
+#source <- "https://d396qusza40orc.cloudfront.net/getdata%2Fjeff.jpg"
+source <- "getdata_jeff.jpg"
+data <- readJPEG(source, native = TRUE)
+dim(data)
+```
+
+```{r}
+data[30]
+data[80]
+data[32400]
+```
+
+
+```{r}
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FGDP.csv"
+download.file(fileUrl,destfile="FGDP.csv")
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FEDSTATS_Country.csv"
+download.file(fileUrl,destfile="FEDSTATS_Country.csv")
+```
+
+```{r}
+countries <- read.csv("FGDP.csv")
+education <- read.csv("FEDSTATS_Country.csv")
+```
+
+```{r}
+head(countries)
+head(education)
+```
+
+```{r}
+mergedData <- merge (countries, education, by.x="X",by.y="CountryCode")
+mergedData
+```
+
+
+```{r}
+dim(countries)
+dim(education)
+dim(mergedData)
+```
+
+
+```{r}
+mergedData <- merge (education,countries, by.x="CountryCode",by.y="X")
+dim(mergedData)
+```
+
+1. 125,238,262
+2. F -10904118 -10575416
+3. F 234 matches, 13th country is Spain
+4. F 23.966667, 30.91304
+5. F 3
+```{r}
+```
+
+
+```{r}
 ```
 
 

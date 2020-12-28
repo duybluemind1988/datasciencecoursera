@@ -1,17 +1,22 @@
-complete <- function(directory, id = 1:332) {
-  ## obtaining the required files by storing them into mydata variable
-  mydata <- list.files(path =directory,pattern="*.csv", full.names=TRUE)[id]
-  ## create an empty vector
-  frows <- c()
-  counter <- 1
-  for(file_name in mydata) {
-    ## storing each .csv file without the NA values into fineobject variable
-    fineobject <- na.omit(read.csv(file_name))
-    ## store the number of the fineobject rows in the empty f(ine)rows vector
-    frows[counter] <- nrow(fineobject)
-    counter <- counter + 1
+complete <- function(directory,id=1:332){
+  
+  #create a list of files
+  filesD<-list.files(directory,full.names = TRUE)
+  #create an empty data frame
+  dat <- data.frame()
+  
+  for(i in id){
+    #read in the file
+    temp<- read.csv(filesD[i],header=TRUE)
+    #delete rows that do not have complete cases
+    temp<-na.omit(temp)
+    
+    #count all of the rows with complete cases
+    tNobs<-nrow(temp)
+    
+    #enumerate the complete cases by index
+    dat<-rbind(dat,data.frame(i,tNobs))
+    
   }
-  ## creating and printing the f(ine)list
-  flist <- data.frame("id" = id, "nobs" = frows)
-  print(flist)
+  return(dat)
 }

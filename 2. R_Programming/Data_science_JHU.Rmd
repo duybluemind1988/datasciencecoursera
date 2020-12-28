@@ -65,6 +65,7 @@ pollutantmean("specdata", "nitrate", 70:72)
 ```
 
 ```{r}
+# Best method
 pollutantmean <- function(directory, pollutant, id = 1:332) {
      ## obtaining the required files by storing them into mydata variable
      mydata <- list.files(path = directory,pattern="*.csv", full.names=TRUE)[id]
@@ -80,28 +81,51 @@ pollutantmean <- function(directory, pollutant, id = 1:332) {
 ```{r}
 pollutantmean("specdata", "nitrate", 70:72)
 ```
-
-Part 2
-Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases. A prototype of this function follows
 ```{r}
-complete <- function(directory, id = 1:332){
+pollutantmean <- function(directory, pollutant, id = 1:332) {
+  fileList <- list.files(path = directory, pattern = ".csv", full.names = TRUE)
+  values <- numeric()
   
-  myfiles = list.files(path=directory, pattern="*.csv", full.names=TRUE)
-  for (i in id){
-    data <- read_csv(myfiles[i])
-    print(i)
-    print(dim(data)[1])
+  for (i in id) {
+    data <- read.csv(fileList[i])
+    values <- c(values, data[[pollutant]])
   }
+  mean(values, na.rm = TRUE)
 }
 ```
 
-
 ```{r}
-complete("specdata", 30:25)
+pollutantmean("specdata", "nitrate", 70:72)
+```
+```{r}
+# install.packages("data.table")
+library("data.table")
+
+pollutantmean <- function(directory, pollutant, id = 1:332) {
+  
+  # Format number with fixed width and then append .csv to number
+  fileNames <- paste0(directory, '/', formatC(id, width=3, flag="0"), ".csv" )
+  
+  # Reading in all files and making a large data.table
+  lst <- lapply(fileNames, data.table::fread)
+  dt <- rbindlist(lst)
+  
+  if (c(pollutant) %in% names(dt)){
+    return(dt[, lapply(.SD, mean, na.rm = TRUE), .SDcols = pollutant][[1]])
+  } 
+}
 ```
 
+```{r}
+pollutantmean("specdata", "nitrate", 70:72)
+```
+
+Part 2
+Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases. A prototype of this function follows
+
 
 ```{r}
+# Best method
 complete <- function(directory, id = 1:332) {
      ## obtaining the required files by storing them into mydata variable
      mydata <- list.files(path =directory,pattern="*.csv", full.names=TRUE)[id]
@@ -125,16 +149,178 @@ complete <- function(directory, id = 1:332) {
 ```{r}
 complete("specdata", c(2, 4, 8, 10, 12))
 complete("specdata", 30:25)
+complete("specdata", 2)
 ```
+```{r}
+complete <- function(directory, id = 1:332) {
+  filelist <- list.files(path = directory, pattern = ".csv", full.names = TRUE)
+  print(paste("##", "", "id", "nobs", sep = " "))
+  counter <- 0
+  for (i in id) {
+    counter <- counter + 1
+    data = read.csv(filelist[i])
+    print(paste("##", counter, i, sum(complete.cases(data)), sep=" "))
+  }
+}
+```
+
+```{r}
+complete("specdata", 30:25)
+```
+```{r}
+complete <- function(directory,  id = 1:332) {
+  
+  # Format number with fixed width and then append .csv to number
+  fileNames <- paste0(directory, '/', formatC(id, width=3, flag="0"), ".csv" )
+  
+  # Reading in all files and making a large data.table
+  lst <- lapply(fileNames, data.table::fread)
+  dt <- rbindlist(lst)
+  
+  return(dt[complete.cases(dt), .(nobs = .N), by = ID])
+  
+}
+```
+
+```{r}
+complete("specdata", 30:25)
+```
+```{r}
+directory <-"specdata"
+id <- 30:25
+fileNames <- paste0(directory, '/', formatC(id, width=3, flag="0"), ".csv" )
+# Reading in all files and making a large data.table
+lst <- lapply(fileNames, data.table::fread)
+dt <- rbindlist(lst)
+dt
+```
+```{r}
+#Return a logical vector indicating which cases are complete, i.e., have no missing values.
+#complete.cases(dt)
+```
+
 Part 3
 Write a function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold. The function should return a vector of correlations for the monitors that meet the threshold requirement. If no monitors meet the threshold requirement, then the function should return a numeric vector of length 0. A prototype of this function follows
 
-
 ```{r}
-
+corr <- function(directory, threshold = 0) {
+  
+  # Reading in all files and making a large data.table
+  lst <- lapply(file.path(directory, list.files(path = directory, pattern="*.csv")), data.table::fread)
+  dt <- rbindlist(lst)
+  
+  # Only keep completely observed cases
+  dt <- dt[complete.cases(dt),]
+  
+  # Apply threshold
+  dt <- dt[, .(nobs = .N, corr = cor(x = sulfate, y = nitrate)), by = ID][nobs > threshold]
+  return(dt[, corr])
+}
 ```
 
 
 ```{r}
+cr <- corr("specdata", 150)
+head(cr)
+```
+
+
+```{r}
+```
+
+https://zenagiwa.wordpress.com/2016/06/08/r-programming-assignment-1/
+
+```{r}
+pollutantmean<-function(directory,pollutant,id=1:332){
+  #create a list of files
+  filesD<-list.files(directory,full.names = TRUE)
+  #create an empty data frame
+  dat <- data.frame()
+  
+  #loop through the list of files until id is found
+  for(i in id){
+    #read in the file
+    temp<- read.csv(filesD[i],header=TRUE)
+    #add files to the main data frame
+    dat<-rbind(dat,temp)
+  }
+  #find the mean of the pollutant, make sure you remove NA values
+  return(mean(dat[,pollutant],na.rm = TRUE))
+  
+}
+
+pollutantmean("specdata", "nitrate", 70:72)
+```
+
+
+```{r}
+complete <- function(directory,id=1:332){
+
+#create a list of files
+  filesD<-list.files(directory,full.names = TRUE)
+  #create an empty data frame
+  dat <- data.frame()
+  
+  for(i in id){
+  #read in the file
+    temp<- read.csv(filesD[i],header=TRUE)
+    #delete rows that do not have complete cases
+    temp<-na.omit(temp)
+    
+    #count all of the rows with complete cases
+    nobs<-nrow(temp)
+    
+    #enumerate the complete cases by index
+    dat<-rbind(dat,data.frame(i,nobs))
+   
+  }
+    return(dat)
+}
+
+complete("specdata", 30:25)
+```
+
+
+```{r}
+corr<-function(directory,threshold=0){
+#create list of file names
+  filesD<-list.files(directory,full.names = TRUE)
+  
+  #create empty vector
+  dat <- vector(mode = "numeric", length = 0)
+  
+  for(i in 1:length(filesD)){
+  #read in file
+    temp<- read.csv(filesD[i],header=TRUE)
+    #delete NAs
+    temp<-temp[complete.cases(temp),]
+    #count the number of observations
+    csum<-nrow(temp)
+    #if the number of rows is greater than the threshold
+    if(csum>threshold){
+   #for that file you find the correlation between nitrate and sulfate
+   #combine each correlation for each file in vector format using the concatenate function 
+   #since this is not a data frame we cannot use rbind or cbind
+      dat<-c(dat,cor(temp$nitrate,temp$sulfate))
+    }
+    
+  }
+
+  return(dat)
+}
+```
+
+
+```{r}
+cr <- corr("specdata", 400)
+head(cr)
+```
+
+```{r}
+cr <- corr("specdata", 2000)                
+n <- length(cr)                
+cr <- corr("specdata", 1000)                
+cr <- sort(cr)
+print(c(n, round(cr, 4)))
 ```
 

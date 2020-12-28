@@ -1,10 +1,17 @@
-pollutantmean <- function(directory, pollutant, id = 1:332) {
-  ## obtaining the required files by storing them into mydata variable
-  mydata <- list.files(path = directory,pattern="*.csv", full.names=TRUE)[id]
-  ## reading the .csv files of mydata
-  readfiles <- lapply(mydata, read.csv)
-  ## combine all the files into one file so that we can calculate the mean at once
-  combine <- do.call(rbind,readfiles)
-  ##calculate the mean without the NA values
-  mean(combine[,pollutant], na.rm = TRUE)
+pollutantmean<-function(directory,pollutant,id=1:332){
+  #create a list of files
+  filesD<-list.files(directory,full.names = TRUE)
+  #create an empty data frame
+  dat <- data.frame()
+  
+  #loop through the list of files until id is found
+  for(i in id){
+    #read in the file
+    temp<- read.csv(filesD[i],header=TRUE)
+    #add files to the main data frame
+    dat<-rbind(dat,temp)
+  }
+  #find the mean of the pollutant, make sure you remove NA values
+  return(mean(dat[,pollutant],na.rm = TRUE))
+  
 }
