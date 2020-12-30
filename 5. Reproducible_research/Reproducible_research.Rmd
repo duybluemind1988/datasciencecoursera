@@ -1,42 +1,85 @@
 ---
-title: "Untitled"
+title: "Analysis of the Adverse Health and Economic Impacts of US Storms"
+author: "Nguyen Ngoc Duy"
+date: "30/12/2020"
 output: html_document
 ---
 ```{r}
 getwd()
 setwd("/home/ad/Data_science/R_studio/Git/datasciencecoursera/5. Reproducible_research")
 ```
+## 1. Goal of this assignment:
+
+The basic goal of this assignment is to explore the NOAA Storm Database and answer some basic questions about severe weather events. The data analysis  address the following questions:
+
+- Across the United States, which types of events (as indicated in the \color{red}{\verb|EVTYPE|}EVTYPE variable) are most harmful with respect to population health?
+- Across the United States, which types of events have the greatest economic consequences?
+
+## 2. Data Processing
+### 2.1 Load Data
 
 ```{r}
 library(data.table)
 library(tidyverse)
+path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/JHU data/repdata_data_StormData.csv"
+data <- fread(path)
+head(data)
+```
+```{r}
+# Convert EVTYPE to factor
+data[,EVTYPE := lapply(.SD,as.factor), .SDcols= c("EVTYPE")]
+```
+
+### 2.2 Calcuating Total Fatalities and Injuries
+
+```{r}
+totalInjuries <- data[,.(FATALITIES = sum(FATALITIES), INJURIES = sum(INJURIES), totals = sum(FATALITIES) + sum(INJURIES)),by="EVTYPE"][order(-totals)]
+totalInjuries <- totalInjuries[,head(.SD,10)]
+totalInjuries
+```
+
+### 2.3 Calcuating Total Property and Crop Damage
+
+```{r}
+totaldamage <- data[,.(propCost = sum(PROPDMG), cropCost = sum(CROPDMG), Total_Cost = sum(PROPDMG) + sum(CROPDMG)),by="EVTYPE"][order(-Total_Cost)]
+totaldamage <- totaldamage[,head(.SD,10)]
+totaldamage
+```
+
+## 3. Results
+### 3.1 Events that are Most Harmful to Population Health
+
+Melting data.table so that it is easier to put in bar graph format
+```{r}
+totalInjuries_melt <- melt(totalInjuries, id.vars="EVTYPE", variable.name = "Health_harmful")
+head(totalInjuries_melt,10)
 ```
 
 ```{r}
-
+totalInjuries_melt %>% 
+  ggplot(aes(x=reorder(EVTYPE,-value),y=value)) +
+  geom_bar(stat="identity",aes(fill=Health_harmful),position="dodge") +
+  labs(x="Event type", y=expression("number of Fatalities & Injuries")) + 
+  labs(title=expression("Top 10 events causing Harmful to population health"))+
+  theme(axis.text.x = element_text(angle=45, hjust=1))
 ```
+Fig: Tornado is the most harmful to population health
 
+### 3.2. Events that have the Greatest Economic Consequences
+
+Melting data.table so that it is easier to put in bar graph format
+```{r}
+totaldamage_melt <- melt(totaldamage, id.vars="EVTYPE", variable.name = "economic_consquences")
+head(totaldamage_melt,10)
+```
 
 ```{r}
+totaldamage_melt %>% 
+  ggplot(aes(x=reorder(EVTYPE,-value),y=value)) +
+  geom_bar(stat="identity",aes(fill=economic_consquences),position="dodge") +
+  labs(x="Event type", y=expression("Property & Crop damage")) + 
+  labs(title=expression("Top 10 events causing Economic consequences")) +
+  theme(axis.text.x = element_text(angle=45, hjust=1))
 ```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
+Fig: Tornado is the most economic damage
 
