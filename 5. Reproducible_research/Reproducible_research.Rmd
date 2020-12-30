@@ -1,5 +1,5 @@
 ---
-title: "Analysis of the Adverse Health and Economic Impacts of US Storms"
+title: "Analysis of the Population Health effect and Economic consequences of US Storms"
 author: "Nguyen Ngoc Duy"
 date: "30/12/2020"
 output: html_document
