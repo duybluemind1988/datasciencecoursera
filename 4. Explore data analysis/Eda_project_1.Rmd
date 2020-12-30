@@ -1,0 +1,224 @@
+---
+title: "EDA"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(data.table)
+path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/household_power_consumption.txt"
+data <- fread(path)
+dim(data) # 2075259 9
+head(data)
+```
+Description: Measurements of electric power consumption in one household with a one-minute sampling rate over a period of almost 4 years. Different electrical quantities and some sub-metering values are available.
+
+Date: Date in format dd/mm/yyyy
+Time: time in format hh:mm:ss
+Global_active_power: household global minute-averaged active power (in kilowatt)
+Global_reactive_power: household global minute-averaged reactive power (in kilowatt)
+Voltage: minute-averaged voltage (in volt)
+Global_intensity: household global minute-averaged current intensity (in ampere)
+Sub_metering_1: energy sub-metering No. 1 (in watt-hour of active energy). It corresponds to the kitchen, containing mainly a dishwasher, an oven and a microwave (hot plates are not electric but gas powered).
+Sub_metering_2: energy sub-metering No. 2 (in watt-hour of active energy). It corresponds to the laundry room, containing a washing-machine, a tumble-drier, a refrigerator and a light.
+Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). It corresponds to an electric water-heater and an air-conditioner.
+```{r}
+str(data)
+```
+
+# Check missing value   
+```{r}
+sum(is.na(data))
+```
+```{r}
+null_value <- sapply(data, function(x) sum(is.na(x)))
+class(null_value)
+null_value_df <- as.data.frame(null_value) %>% arrange(desc(null_value)) %>% filter(null_value > 0)
+# Name the unnamed first column
+null_value_df <- cbind(Features= rownames(null_value_df), null_value_df)
+rownames(null_value_df) <- NULL
+# Add percentage column
+total_rows <- dim(data)[1]
+null_value_df <- null_value_df %>% mutate(percentage=null_value/total_rows*100)
+null_value_df
+```
+
+# Convert date and time data
+```{r}
+library(hms)
+data$Date <- as.Date(data$Date)
+data$Time <- as_hms(data$Time)
+head(data)
+```
+```{r}
+data <- data %>% mutate_if(is.character,as.numeric)
+```
+
+```{r}
+head(data)
+```
+```{r}
+library(corrplot)
+M <-cor(data %>% select_if(is.numeric))
+M
+```
+```{r}
+corrplot(M, type="upper", order="original")
+```
+
+```{r}
+library(corrplot)
+source("http://www.sthda.com/upload/rquery_cormat.r")
+rquery.cormat(data %>% select_if(is.numeric))
+```
+```{r}
+rquery.cormat(data %>% select_if(is.numeric), type="full")
+```
+```{r}
+rquery.cormat(data %>% select_if(is.numeric), graphType="heatmap")
+```
+
+```{r}
+library(DataExplorer)
+introduce(data)
+```
+
+
+```{r}
+plot_intro(data)
+```
+
+
+```{r}
+## View missing value distribution for airquality data
+plot_missing(data)
+```
+
+```{r}
+## View histogram of all continuous variables
+plot_histogram(data)
+```
+
+
+```{r}
+## View estimated density distribution of all continuous variables
+plot_density(data)
+```
+
+
+```{r}
+plot_correlation(data %>% select_if(is.numeric))
+```
+
+
+```{r}
+## View bivariate continuous distribution based on `cut`
+plot_boxplot(data,by="Voltage")
+```
+
+
+```{r}
+## Scatterplot `price` with all other continuous features
+plot_scatterplot(split_columns(data)$continuous, by = "Voltage", sampled_rows = 1000L)
+```
+# Datatable style
+```{r}
+library(data.table)
+path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/household_power_consumption.txt"
+#Reads in data from file then subsets data for specified dates
+powerDT <- data.table::fread(path,
+                             , na.strings="?"
+                             )
+```
+
+```{r}
+dim(powerDT)
+```
+
+```{r}
+# Prevents histogram from printing in scientific notation
+powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
+
+# Change Date Column to Date Type
+powerDT[, Date := lapply(.SD, as.Date, "%d/%m/%Y"), .SDcols = c("Date")]
+
+# Filter Dates for 2007-02-01 and 2007-02-02
+powerDT <- powerDT[(Date >= "2007-02-01") & (Date <= "2007-02-02")]
+png("plot1.png", width=480, height=480)
+hist(powerDT[, Global_active_power], main="Global Active Power", 
+     xlab="Global Active Power (kilowatts)", ylab="Frequency", col="Red")
+
+```
+
+
+
+```{r}
+png("plot2.png", width=480, height=480)
+# Prevents Scientific Notation
+powerDT[, Global_active_power := lapply(.SD, as.numeric), .SDcols = c("Global_active_power")]
+
+# Making a POSIXct date capable of being filtered and graphed by time of day
+powerDT[, dateTime := as.POSIXct(paste(Date, Time), format = "%d/%m/%Y %H:%M:%S")]
+
+# Filter Dates for 2007-02-01 and 2007-02-02
+powerDT <- powerDT[(dateTime >= "2007-02-01") & (dateTime < "2007-02-03")]
+## Plot 2
+plot(x = powerDT[, dateTime]
+     , y = powerDT[, Global_active_power]
+     , type="l", xlab="", ylab="Global Active Power (kilowatts)")
+
+#dev.off()
+```
+
+
+```{r}
+png("plot3.png", width=480, height=480)
+
+# Plot 3
+plot(powerDT[, dateTime], powerDT[, Sub_metering_1], type="l", xlab="", ylab="Energy sub metering")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_2],col="red")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_3],col="blue")
+legend("topright"
+       , col=c("black","red","blue")
+       , c("Sub_metering_1  ","Sub_metering_2  ", "Sub_metering_3  ")
+       ,lty=c(1,1), lwd=c(1,1))
+```
+
+
+```{r}
+png("plot4.png", width=480, height=480)
+
+par(mfrow=c(2,2))
+
+# Plot 1
+plot(powerDT[, dateTime], powerDT[, Global_active_power], type="l", xlab="", ylab="Global Active Power")
+
+# Plot 2
+plot(powerDT[, dateTime],powerDT[, Voltage], type="l", xlab="datetime", ylab="Voltage")
+
+# Plot 3
+plot(powerDT[, dateTime], powerDT[, Sub_metering_1], type="l", xlab="", ylab="Energy sub metering")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_2], col="red")
+lines(powerDT[, dateTime], powerDT[, Sub_metering_3],col="blue")
+legend("topright", col=c("black","red","blue")
+       , c("Sub_metering_1  ","Sub_metering_2  ", "Sub_metering_3  ")
+       , lty=c(1,1)
+       , bty="n"
+       , cex=.5) 
+
+# Plot 4
+plot(powerDT[, dateTime], powerDT[,Global_reactive_power], type="l", xlab="datetime", ylab="Global_reactive_power")
+
+dev.off()
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
