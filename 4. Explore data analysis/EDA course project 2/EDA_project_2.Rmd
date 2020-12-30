@@ -1,0 +1,110 @@
+---
+title: "Untitled"
+output: html_document
+---
+1. Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the base plotting system, make a plot showing the total PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.
+```{r}
+NEI_path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/JHU data/exdata_data_NEI_data/summarySCC_PM25.rds"
+SCC_path <- "/media/ad/01D6B57CFBE4DB20/1.Linux/Data/JHU data/exdata_data_NEI_data/Source_Classification_Code.rds"
+```
+
+
+```{r}
+## This first line will likely take a few seconds. Be patient!
+NEI <- readRDS(NEI_path)
+SCC <- readRDS(SCC_path)
+```
+
+
+```{r}
+dim(NEI)
+dim(SCC)
+```
+
+
+```{r}
+head(NEI)
+```
+- fips: A five-digit number (represented as a string) indicating the U.S. county
+- SCC: The name of the source as indicated by a digit string (see source code classification table)
+- Pollutant: A string indicating the pollutant
+- Emissions: Amount of PM2.5 emitted, in tons
+- type: The type of source (point, non-point, on-road, or non-road)
+- year: The year of emissions recorded
+
+```{r}
+str(NEI)
+```
+
+```{r}
+head(SCC)
+```
+```{r}
+str(SCC)
+```
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+summary(NEI)
+```
+```{r}
+NEI
+NEI$year <- as.factor(NEI$year)
+```
+
+```{r}
+class(NEI)
+```
+
+```{r}
+total_emissions_by_year <- NEI %>% group_by(year) %>% summarise(sum_all = sum(Emissions))
+total_emissions_by_year
+```
+```{r}
+class(total_emissions_by_year)
+```
+
+```{r}
+total_emissions_by_year %>% 
+  ggplot(aes(x=year,y=sum_all))+
+  geom_bar(stat = "identity")
+  #geom_line()
+```
+
+```{r}
+with(total_emissions_by_year,barplot(sum_all,names = year,
+         xlab = "Years", ylab = "Emissions",
+         main = "Emissions over the Years"
+         ))
+```
+
+
+
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+```{r}
+```
+
+
+```{r}
+```
+
