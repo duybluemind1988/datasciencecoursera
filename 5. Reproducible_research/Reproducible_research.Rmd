@@ -1,0 +1,42 @@
+---
+title: "Untitled"
+output: html_document
+---
+```{r}
+getwd()
+setwd("/home/ad/Data_science/R_studio/Git/datasciencecoursera/5. Reproducible_research")
+```
+
+```{r}
+library(data.table)
+library(tidyverse)
+```
+
+```{r}
+
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
