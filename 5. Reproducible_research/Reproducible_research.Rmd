@@ -63,6 +63,7 @@ totalInjuries_melt %>%
   labs(title=expression("Top 10 events causing Harmful to population health"))+
   theme(axis.text.x = element_text(angle=45, hjust=1))
 ```
+
 Fig: Tornado is the most harmful to population health
 
 ### 3.2. Events that have the Greatest Economic Consequences
@@ -81,5 +82,6 @@ totaldamage_melt %>%
   labs(title=expression("Top 10 events causing Economic consequences")) +
   theme(axis.text.x = element_text(angle=45, hjust=1))
 ```
+
 Fig: Tornado is the most economic damage
 
