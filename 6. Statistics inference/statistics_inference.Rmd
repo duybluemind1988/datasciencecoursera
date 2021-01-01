@@ -2,20 +2,332 @@
 title: "Untitled"
 output: html_document
 ---
+# Quiz 1
 ```{r}
 #install.packages("gitcreds")
 library(tidyverse)
 library(data.table)
 
 ```
-
+17 = 12 + a - 6
+a=11
 ```{r}
-library(gitcreds)
-gitcreds_set()
+x <- 1:4
+p <- x/sum(x)
+temp <- rbind(x, p)
+rownames(temp) <- c("X", "Prob")
+temp
+
 ```
 
 ```{r}
+1*0.1 + 2*0.2 +3*0.3+4*0.4
+```
+# Quiz 2
 
+Question 2
+Suppose that diastolic blood pressures (DBPs) for men aged 35-44 are normally distributed with a mean of 80 (mm Hg) and a standard deviation of 10. About what is the probability that a random 35-44 year old has a  DBP less than 70?
+
+pnorm(x, mean=mu, sd=sd, lower.tail=F) = returns the probability of an observation drawn from the given distribution is larger in value than the specified threshold x
+```{r}
+mu=80
+sd=10
+x=70
+pnorm(x, mean=mu, sd=sd, lower.tail=T)
+
+```
+Question 3
+Brain volume for adult women is normally distributed with a mean of about 1,100 cc for women with a standard deviation of 75 cc. What brain volume represents the 95th percentile?
+
+qnorm(n, mean=mu, sd=sd) = returns the nth percentiles for the given normal distribution
+```{r}
+mu=1100
+sd= 75
+n=0.95
+qnorm(n, mean=mu, sd=sd)
+```
+Question 4
+Refer to the previous question. Brain volume for adult women is about 1,100 cc for women with a standard deviation of 75 cc. Consider the sample mean of 100 random adult women from this population. What is the 95th percentile of the distribution of that sample mean? 
+
+```{r}
+mu=1100
+sd_population= 75
+sampe_size = 100
+sd_sample= sd_population / sqrt(sampe_size)
+n=0.95
+sd_sample
+qnorm(n, mean=mu, sd=sd_sample)
+```
+
+
+Question 5
+You flip a fair coin 5 times, about what's the probability of getting 4 or 5 heads?
+
+discrete (what you can count/categories) = assign probabilities to every number/value the variable can take (coin flip, rolling a die, web traffic in a day)
+
+Binomial (coin flips)
+probability of getting x results out of n trials and event probability of p = 
+pbinom(x, size = n, prob = p, lower.tail = FALSE)
+```{r}
+x= 4
+n= 5
+p= 0.5
+pbinom(x, size = n, prob = p, lower.tail = FALSE)
+```
+
+Question 6 (VERY HARD)
+The respiratory disturbance index (RDI), a measure of sleep disturbance, for a specific population has a mean of 15 (sleep events per hour) and a standard deviation of 10. They are not normally distributed. Give your best estimate of the probability that a sample mean RDI of 100 people is between 14 and 16 events per hour?
+
+for the sample mean X¯∼N(μ,σ2/n)
+```{r}
+# confident interval 0.95
+mean= 15
+sd=10
+n=100
+# calculate confidence interval for sons height in inches
+mean + c(-1, 1) * qnorm(0.975) * sd/sqrt(n)
+```
+```{r}
+# lower.tail True as default : probabilites X <=x
+# probabities X < 16 - probabilities X < 14 --> probability 14 < x < 16
+pnorm(16, mean = 15, sd = 1) - pnorm(14, mean = 15, sd = 1)
+```
+
+Question 7
+Consider a standard uniform density. The mean for this density is .5 and the variance is 1 / 12. You sample 1,000 observations from this distribution and take the sample mean, what value would you expect it to be near?
+```{r}
+# standard uniform density
+mean = 0.5
+variance = 1/12
+n=1000
+
+```
+
+Question 8
+The number of people showing up at a bus stop is assumed to be
+Poisson with a mean of  5  people per hour. You watch the bus
+stop for 3 hours. About what's the probability of viewing 10 or fewer people?
+```{r}
+# calculate using distribution
+mean = 5
+total_hour = 3
+x = 10
+ppois(x, lambda = mean * total_hour)
+```
+# Quiz 3
+1.
+In a population of interest, a sample of 9 men yielded a sample average brain volume of 1,100cc and a standard deviation of 30cc. What is a 95% Student's T confidence interval for the mean brain volume in this new population?
+
+Confidence Intervals - Normal Distribution/Z Intervals (for population mean)
+
+```{r}
+# confident interval 0.95
+mean= 1100
+sd=30
+n=9
+# calculate confidence interval for sons height in inches
+mean + c(-1, 1) * qnorm(0.975) * sd/sqrt(n)
+```
+Confidence Intervals - T Distribution(Small Samples)
+
+```{r}
+# BEST
+mean= 1100
+sd=30
+n=9
+mean + c(-1, 1) * qt(0.975, n - 1) * sd/sqrt(n)
+```
+
+2. 
+A diet pill is given to 9 subjects over six weeks. The average difference in weight (follow up - baseline) is -2 pounds. What would the standard deviation of the difference in weight have to be for the upper endpoint of the 95% T confidence interval to touch 0?
+
+Upper point confidence interval:
+t Confidence Intervals
+upper_limit <- mean + 1 * qt(0.975, n - 1) * std/sqrt(n)
+```{r}
+# Confidence Intervals - T Distribution(Small Samples)
+# upper_limit <- mean + 1 * qt(0.975, n - 1) * std/sqrt(n)
+mean= -2
+#sd=30
+n=9
+upper_limit = 0
+qt(0.975, n - 1) # t 8,.975
+sd <- (upper_limit-mean)*sqrt(n)/ qt(0.975, n - 1)
+sd # 3.061281
+```
+t 
+8,.975 =2.31 Then set   −2+2.31×S/3=0≈2.60 Solve for  S S to get around 2.60.
+ 
+3.
+In an effort to improve running performance, 5 runners were either given a protein supplement or placebo. Then, after a suitable washout period, they were given the opposite treatment. Their mile times were recorded under both the treatment and placebo, yielding 10 measurements with 2 per subject. The researchers intend to use a T test and interval to investigate the treatment. Should they use a paired or independent group T test and interval?
+
+
+```{r}
+# a pair interval
+```
+
+4
+In a study of emergency room waiting times, investigators consider a new and the standard triage systems. To test the systems, administrators selected 20 nights and randomly assigned the new triage system to be used on 10 nights and the standard system on the remaining 10 nights. They calculated the nightly median waiting time (MWT) to see a physician. The average MWT for the new system was 3 hours with a variance of 0.60 while the average MWT for the old system was 5 hours with a variance of 0.68. Consider the 95% confidence interval estimate for the differences of the mean MWT associated with the new system. Assume a constant variance. What is the interval? Subtract in this order (New System - Old System). 
+
+```{r}
+# Best
+n1 <- n2 <- 10
+n <- 20
+xbar1 <- 5
+xbar2 <- 3
+s1 <- 0.68
+s2 <- 0.6
+sp <- sqrt (0.5*s1 + 0.5*s2)
+xbar2 - xbar1 + c(-1, 1) * qt(0.975, n) *sp* sqrt(1/n1 + 1/n2)
+```
+
+5
+Suppose that you create a 95% T confidence interval. You then create a 90% interval using the same data. What can be said about the 90% interval with respect to the 95% interval?
+```{r}
+#  The interval will be narrower.
+```
+6.
+To further test the hospital triage system, administrators selected 200 nights and randomly assigned a new triage system to be used on 100 nights and a standard system on the remaining 100 nights. They calculated the nightly median waiting time (MWT) to see a physician. The average MWT for the new system was 4 hours with a standard deviation of 0.5 hours while the average MWT for the old system was 6 hours with a standard deviation of 2 hours. Consider the hypothesis of a decrease in the mean MWT associated with the new treatment. 
+
+What does the 95% independent group confidence interval with unequal variances suggest vis a vis this hypothesis? (Because there's so many observations per group, just use the Z quantile instead of the T.) 
+```{r}
+# When subtracting (old - new) the interval is entirely above zero. The new system appears to be effective.
+```
+
+```{r}
+# Independent Group t Intervals - Different Variance
+n1 <- n2 <- 100
+xbar1 <- 4
+xbar2 <- 6
+s1 <- 0.5
+s2 <- 2
+xbar2 - xbar1 + c(-1, 1) * qnorm(0.975) * sqrt(s1^2/n1 + s2^2/n2)
+```
+
+Question 7
+Suppose that 18 obese subjects were randomized, 9 each, to a new diet pill and a placebo. Subjects’ body mass indices (BMIs) were measured at a baseline and again after having received the treatment or placebo for four weeks. The average difference from follow-up to the baseline (followup - baseline) was −3 kg/m2 for the treated group and 1 kg/m2 for the placebo group. The corresponding standard deviations of the differences was 1.5 kg/m2 for the treatment group and 1.8 kg/m2 for the placebo group. Does the change in BMI over the four week period appear to differ between the treated and placebo groups?  Assuming normality of the underlying data and a common population variance, calculate the relevant *90%* t confidence interval. Subtract in the order of (Treated - Placebo) with the smaller (more negative) number first.
+
+```{r}
+# Independent Group t Intervals - Same Variance
+n1 <- n2 <- 9
+x1 <- -3 ##treated
+x2 <- 1 ##placebo
+s1 <- 1.5 ##treated
+s2 <- 1.8 ##placebo
+s <- sqrt(((n1 - 1) * s1^2 + (n2 - 1) * s2^2)/(n1 + n2 - 2))
+(x1 - x2) + c(-1, 1) * qt(0.95, n1 + n2 - 2) * s * sqrt(1/n1 + 1/n2)
+```
+
+# Quiz 4
+```{r}
+library(tidyverse)
+```
+
+1.
+A pharmaceutical company is interested in testing a potential blood pressure lowering medication. Their first examination considers only subjects that received the medication at baseline then two weeks later. The data are as follows (SBP in mmHg)
+```{r}
+data <- data.frame("Subject" = 1:5, "Baseline" = c(140,138,150,148,135),
+                "Week2" = c(132,135,151,146,130))
+data
+```
+
+```{r}
+#install.packages("reshape2")
+library(reshape2)
+data.m <- melt(data,id.vars='Subject',variable.name = "var")
+data.m 
+```
+
+```{r}
+data.m %>% 
+  ggplot(aes(x=var,y=value)) +
+  geom_boxplot()
+  
+```
+
+Paired t-test can be used only when the difference d is normally distributed. This can be checked using Shapiro-Wilk test.
+```{r}
+# compute the difference
+d <- with(data,Week2 - Baseline)
+# Shapiro-Wilk normality test for the differences
+shapiro.test(d) 
+```
+From the output, the p-value is greater than the significance level 0.05 implying that the distribution of the differences (d) are not significantly different from normal distribution. In other words, we can assume the normality.
+```{r}
+# OK if one side
+t.test(data$Week2, data$Baseline, paired = TRUE,alternative = "less")
+# alternative hypo: week2 < base line or week2 - baseline < 0
+```
+p value > 0.05 --> reject hypothesis, week2 < baseline
+```{r}
+# OK
+t.test(data$Week2, data$Baseline, paired = TRUE,alternative = c("two.sided"))
+```
+```{r}
+# OK
+bl <- c(140, 138, 150, 148, 135)
+fu <- c(132, 135, 151, 146, 130)
+t.test(fu, bl, alternative = "two.sided", paired = TRUE)
+```
+
+Question 2
+A sample of 9 men yielded a sample average brain volume of 1,100cc and a standard deviation of 30cc. What is the complete set of values of μ0 that a test of  
+H 0:μ=μ0 would fail to reject the null hypothesis in a two sided 5% Students
+t-test?
+
+```{r}
+mean= 1100
+sd=30
+n=9
+mean + c(-1, 1) * qt(0.975, n - 1) * sd/sqrt(n)
+```
+Question 3
+Researchers conducted a blind taste test of Coke versus Pepsi. Each of four people was asked which of two blinded drinks given in random order that they preferred. The data was such that 3 of the 4 people chose Coke. Assuming that this sample is representative, report a P-value for a test of the hypothesis that Coke is preferred to Pepsi using a one sided exact test.
+
+```{r}
+pbinom(2, size = 4, prob = 0.5, lower.tail = FALSE)
+```
+```{r}
+choose(4, 3) * 0.5^4 + choose(4, 4) * 0.5^4
+```
+
+Question 4
+Infection rates at a hospital above 1 infection per 100 person days at risk are believed to be too high and are used as a benchmark. A hospital that had previously been above the benchmark recently had 10 infections over the last 1,787 person days at risk. About what is the one sided P-value for the relevant test of whether the hospital is *below* the standard? 
+
+```{r}
+ppois(10, lambda = 0.01 * 1787)
+```
+Question 5
+Suppose that 18 obese subjects were randomized, 9 each, to a new diet pill and a placebo. Subjects’ body mass indices (BMIs) were measured at a baseline and again after having received the treatment or placebo for four weeks. The average difference from follow-up to the baseline (followup - baseline) was −3 kg/m2 for the treated group and 1 kg/m2 for the placebo group. The corresponding standard deviations of the differences was 1.5 kg/m2 for the treatment group and 1.8 kg/m2 for the placebo group. Does the change in BMI appear to differ between the treated and placebo groups?  Assuming normality of the underlying data and a common population variance, give a pvalue for a two sided t test.
+```{r}
+n1 <- n2 <- 9
+x1 <- -3 ##treated
+x2 <- 1 ##placebo
+s1 <- 1.5 ##treated
+s2 <- 1.8 ##placebo
+s <- sqrt(((n1 - 1) * s1^2 + (n2 - 1) * s2^2)/(n1 + n2 - 2))
+ts <- (x1 - x2)/(s * sqrt(1/n1 + 1/n2))
+2 * pt(ts, n1 + n2 - 2)
+```
+Question 6
+Brain volumes for 9 men yielded a 90% confidence interval of 1,077 cc to 1,123 cc. Would you reject in a two sided 5% hypothesis test of 
+```{r}
+# No you wouldn't reject.
+```
+Question 7
+Researchers would like to conduct a study of  100 100 healthy adults to detect a four year mean brain volume loss of.01~mm^3. Assume that the standard  deviation of four year volume loss in this population is  .04~mm^3. About what would be the power of the study for a 5% one sided test versus a null hypothesis of no volume loss?
+```{r}
+pnorm(1.645 * 0.004, mean = 0.01, sd = 0.004, lower.tail = FALSE)
+```
+Question 8
+Researchers would like to conduct a study of  n n healthy adults to detect a four year mean brain volume loss of   .01~mm^3 . Assume that the standard deviation of four year volume loss in this population is  .04~mm^3 . About what would be the value of  n n needed for  90\% 90% power of type one error rate of 5% one sided test versus a null hypothesis of no volume loss?
+```{r}
+ceiling((4 * (qnorm(0.95) - qnorm(0.1)))^2)
+```
+Question 9
+As you increase the type one error rate,  \alpha α, what happens to power?
+```{r}
+# You will get larger power.
 ```
 
 ```{r}
