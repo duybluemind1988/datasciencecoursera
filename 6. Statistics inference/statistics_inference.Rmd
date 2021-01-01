@@ -3,14 +3,15 @@ title: "Untitled"
 output: html_document
 ---
 ```{r}
-#install.packages("data.table")
+#install.packages("gitcreds")
 library(tidyverse)
 library(data.table)
 
 ```
 
 ```{r}
-
+library(gitcreds)
+gitcreds_set()
 ```
 
 ```{r}
