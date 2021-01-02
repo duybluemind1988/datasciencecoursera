@@ -1,0 +1,317 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage[unicode=true]{hyperref}
+\hypersetup{
+            pdftitle={statistics project},
+            pdfauthor={Nguyen Ngoc Duy},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{statistics project}
+\author{Nguyen Ngoc Duy}
+\date{}
+
+\begin{document}
+\maketitle
+
+\subsection{Part 1: Simulation Exercise
+Instructions}\label{part-1-simulation-exercise-instructions}
+
+\subsubsection{1.1 Simulations:}\label{simulations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#install.packages("tinytex")}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## -- Attaching packages --------------------------------------- tidyverse 1.3.0 --
+\end{verbatim}
+
+\begin{verbatim}
+## v ggplot2 3.3.3     v purrr   0.3.4
+## v tibble  3.0.4     v dplyr   1.0.2
+## v tidyr   1.1.2     v stringr 1.4.0
+## v readr   1.4.0     v forcats 0.5.0
+\end{verbatim}
+
+\begin{verbatim}
+## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{### As a motivating example, compare the distribution of 1000 random uniforms}
+\CommentTok{#hist(runif(1000))}
+\CommentTok{#and the distribution of 1000 averages of 40 random uniforms}
+\CommentTok{#mns = NULL}
+\CommentTok{#for (i in 1 : 1000) mns = c(mns, mean(runif(40)))}
+\CommentTok{#hist(mns)}
+\end{Highlighting}
+\end{Shaded}
+
+Distribution of a large collection of random exponentials
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lambda <-}\StringTok{ }\FloatTok{0.2}
+\NormalTok{n <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{random_exponentials <-}\StringTok{ }\KeywordTok{runif}\NormalTok{(}\KeywordTok{rexp}\NormalTok{(n,lambda))}
+\KeywordTok{hist}\NormalTok{(random_exponentials)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Part-1-Simulation-Exercise_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+Distribution of a large collection of averages of 40 exponentials.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mns =}\StringTok{ }\OtherTok{NULL}
+\NormalTok{n=}\DecValTok{40}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1} \OperatorTok{:}\StringTok{ }\DecValTok{1000}\NormalTok{) mns =}\StringTok{ }\KeywordTok{c}\NormalTok{(mns, }\KeywordTok{mean}\NormalTok{(}\KeywordTok{runif}\NormalTok{(}\KeywordTok{rexp}\NormalTok{(n,lambda) )))}
+\NormalTok{average_exponentials <-}\StringTok{ }\NormalTok{mns}
+\KeywordTok{hist}\NormalTok{(average_exponentials)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Part-1-Simulation-Exercise_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_combine <-}\StringTok{ }\KeywordTok{cbind}\NormalTok{(random_exponentials,average_exponentials)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(reshape2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'reshape2'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:tidyr':
+## 
+##     smiths
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_combine_melt <-}\StringTok{ }\KeywordTok{melt}\NormalTok{(data_combine)}
+\KeywordTok{head}\NormalTok{(data_combine_melt)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Var1                Var2     value
+## 1    1 random_exponentials 0.1743050
+## 2    2 random_exponentials 0.3821019
+## 3    3 random_exponentials 0.1785835
+## 4    4 random_exponentials 0.5433277
+## 5    5 random_exponentials 0.8360920
+## 6    6 random_exponentials 0.1346194
+\end{verbatim}
+
+\subsubsection{1.2 Show the sample mean and compare it to the
+theoretical mean of the
+distribution.}\label{show-the-sample-mean-and-compare-it-to-the-theoretical-mean-of-the-distribution.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{population_mean <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(random_exponentials)}
+\NormalTok{sample_mean <-}\StringTok{ }\KeywordTok{mean}\NormalTok{(average_exponentials)}
+\NormalTok{sample_mean}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4996544
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{population_mean}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4917351
+\end{verbatim}
+
+Sample\_mean and population\_mean is nearly the same
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_combine_melt }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{Var2,}\DataTypeTok{y=}\NormalTok{value)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Part-1-Simulation-Exercise_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\subsubsection{1.3. Show how variable the sample is (via variance) and
+compare it to the theoretical variance of the
+distribution.}\label{show-how-variable-the-sample-is-via-variance-and-compare-it-to-the-theoretical-variance-of-the-distribution.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{population_var <-}\StringTok{ }\KeywordTok{var}\NormalTok{(random_exponentials)}
+\NormalTok{sample_var <-}\StringTok{ }\KeywordTok{var}\NormalTok{(average_exponentials)}
+\NormalTok{sample_var}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.002102157
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{population_var}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.08157474
+\end{verbatim}
+
+Large different between sample and population variance \#\#\# 1.4. Show
+that the distribution is approximately normal.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{qqnorm}\NormalTok{(average_exponentials)}
+\KeywordTok{qqline}\NormalTok{(average_exponentials, }\DataTypeTok{col =} \DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Part-1-Simulation-Exercise_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Test normal distribution}
+\KeywordTok{shapiro.test}\NormalTok{(average_exponentials)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Shapiro-Wilk normality test
+## 
+## data:  average_exponentials
+## W = 0.99811, p-value = 0.3297
+\end{verbatim}
+
+From the output, the p-value \textgreater{} 0.05 implying that the
+distribution of the data are not significantly different from normal
+distribution. In other words, we can assume the normality.
+
+\end{document}
