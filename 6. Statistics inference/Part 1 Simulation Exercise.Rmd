@@ -1,0 +1,85 @@
+---
+title: "statistics project"
+author: "Nguyen Ngoc Duy"
+output:
+  pdf_document: default
+  html_document: default
+---
+## Part 1: Simulation Exercise Instructions
+### 1.1 Simulations:
+```{r}
+#install.packages("tinytex")
+library(tidyverse)
+```
+
+```{r}
+### As a motivating example, compare the distribution of 1000 random uniforms
+#hist(runif(1000))
+#and the distribution of 1000 averages of 40 random uniforms
+#mns = NULL
+#for (i in 1 : 1000) mns = c(mns, mean(runif(40)))
+#hist(mns)
+```
+
+Distribution of a large collection of random exponentials
+
+```{r}
+lambda <- 0.2
+n <- 1000
+random_exponentials <- runif(rexp(n,lambda))
+hist(random_exponentials)
+```
+
+Distribution of a large collection of averages of 40 exponentials.
+```{r}
+mns = NULL
+n=40
+for (i in 1 : 1000) mns = c(mns, mean(runif(rexp(n,lambda) )))
+average_exponentials <- mns
+hist(average_exponentials)
+```
+
+```{r}
+data_combine <- cbind(random_exponentials,average_exponentials)
+```
+
+```{r}
+library(reshape2)
+data_combine_melt <- melt(data_combine)
+head(data_combine_melt)
+```
+
+### 1.2 Show the sample mean and compare it to the theoretical mean of the distribution.
+```{r}
+population_mean <- mean(random_exponentials)
+sample_mean <- mean(average_exponentials)
+sample_mean
+population_mean
+```
+Sample_mean and population_mean is nearly the same
+```{r}
+data_combine_melt %>% 
+  ggplot(aes(x=Var2,y=value)) +
+  geom_boxplot()
+```
+
+
+### 1.3. Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+```{r}
+population_var <- var(random_exponentials)
+sample_var <- var(average_exponentials)
+sample_var
+population_var
+```
+Large different between sample and population variance
+### 1.4. Show that the distribution is approximately normal.
+```{r}
+qqnorm(average_exponentials)
+qqline(average_exponentials, col = 2)
+```
+
+```{r}
+# Test normal distribution
+shapiro.test(average_exponentials)
+```
+From the output, the p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
