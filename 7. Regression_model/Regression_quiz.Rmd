@@ -1,0 +1,450 @@
+---
+title: "Untitled"
+output: html_document
+---
+# Week 1 quiz
+1.
+Question 1
+Consider the data set given below
+Give the value of μ that minimizes the least squares equation
+```{r}
+x <- c(0.18, -1.54, 0.42, 0.95)
+w <- c(2, 1, 3, 1)
+```
+
+```{r}
+sum(x * w)/sum(w)
+```
+
+2.
+Question 2
+Consider the following data set
+Fit the regression through the origin and get the slope treating y
+
+as the outcome and x as the regressor. (Hint, do not center the data since we want regression through the origin, not through the means of the data.)
+```{r}
+x <- c(0.8, 0.47, 0.51, 0.73, 0.36, 0.58, 0.57, 0.85, 0.44, 0.42)
+y <- c(1.39, 0.72, 1.55, 0.48, 1.19, -1.59, 1.23, -0.65, 1.49, 0.05)
+```
+
+```{r}
+data <- data.frame(cbind(x,y))
+fit <- lm(y ~ x, data = data)
+fit
+```
+3.
+Do data(mtcars) from the datasets package and fit the regression
+model with mpg as the outcome and weight as the predictor. Givethe slope coefficient.
+```{r}
+data(mtcars)
+head(mtcars)
+```
+
+```{r}
+fit <- lm(mpg ~  wt,data = mtcars)
+fit
+```
+4.
+Consider data with an outcome (Y) and a predictor (X). The standard deviation of the predictor is one half that of the outcome. The correlation between the two variables is .5. What value would the slope coefficient for the regression model with YY as the outcome and XX as the predictor?
+
+slope (B) = cor (Y,X) * SD(Y) / SD (X) = 0.5 *2 = 1
+
+```{r}
+
+```
+Question 5
+Students were given two hard tests and scores were normalized to have empirical mean 0 and variance 1. The correlation between the scores on the two tests was 0.4. What would be the expected score on Quiz 2 for a student who had a normalized score of 1.5 on Quiz 1?
+
+Normalize Y and X so slope (B) = cor (Y,X) = 0.4
+Quiz 2 = 0.4 * Quiz 1
+Quiz 1 = 1.5
+```{r}
+0.4 * 1.5 # True result
+1.5 / 0.4 # invert
+```
+6.
+Consider the data given by the following
+What is the value of the first measurement if x were normalized (to have mean 0 and variance 1)?
+
+Standard scaling
+
+Transformed.Values=(Values−Mean)/Standard.Deviation
+```{r}
+x <- c(8.58, 10.46, 9.01, 9.64, 8.86)
+x_scale <-  c(scale(x))
+x_scale
+mean(x_scale)
+sd(x_scale)
+```
+7.
+Question 7
+Consider the following data set (used above as well). What is the intercept for fitting the model with x as the predictor and y as the outcome?
+```{r}
+x <- c(0.8, 0.47, 0.51, 0.73, 0.36, 0.58, 0.57, 0.85, 0.44, 0.42)
+y <- c(1.39, 0.72, 1.55, 0.48, 1.19, -1.59, 1.23, -0.65, 1.49, 0.05)
+data <- data.frame(cbind(x,y))
+fit <- lm(y~x,data)
+fit
+```
+8.
+You know that both the predictor and  response have mean 0. What
+
+can be said about the intercept when you fit a linear regression?
+```{r}
+
+```
+9.
+Question 9
+Consider the data given by
+What value minimizes the sum of the squared distances between these points and itself?
+```{r}
+x <- c(0.8, 0.47, 0.51, 0.73, 0.36, 0.58, 0.57, 0.85, 0.44, 0.42)
+mean(x)
+```
+10
+Y = B X
+X = Y1 Y
+```{r}
+
+```
+# Quiz 2
+1.
+Question 1
+Consider the following data with x as the predictor and y as as the outcome.
+Give a P-value for the two sided hypothesis test of whether β from a linear regression model is 0 or not.
+```{r}
+x <- c(0.61, 0.93, 0.83, 0.35, 0.54, 0.16, 0.91, 0.62, 0.62)
+y <- c(0.67, 0.84, 0.6, 0.18, 0.85, 0.47, 1.1, 0.65, 0.36)
+```
+
+```{r}
+data <- data.frame(cbind(x,y))
+fit <- lm(y ~ x, data = data)
+fit
+```
+
+```{r}
+summary(fit)
+```
+p value: 0.053
+
+The coefficient t-value is a measure of how many standard deviations our coefficient estimate is far away from 0. We want it to be far away from zero as this would indicate we could reject the null hypothesis - that is, we could declare a relationship between speed and distance exist. In our example, the t-statistic values are relatively far away from zero and are large relative to the standard error, which could indicate a relationship exists. In general, t-values are also used to compute p-values.
+
+The Pr(>t) acronym found in the model output relates to the probability of observing any value equal or larger than t. A small p-value indicates that it is unlikely we will observe a relationship between the predictor (speed) and response (dist) variables due to chance. Typically, a p-value of 5% or less is a good cut-off point. In our model example, the p-values are very close to zero. Note the ‘signif. Codes’ associated to each estimate. Three stars (or asterisks) represent a highly significant p-value. Consequently, a small p-value for the intercept and the slope indicates that we can reject the null hypothesis which allows us to conclude that there is a relationship between speed and distance.
+2.
+Question 2
+Consider the previous problem, give the estimate of the residual standard deviation.
+```{r}
+x <- c(0.61, 0.93, 0.83, 0.35, 0.54, 0.16, 0.91, 0.62, 0.62)
+y <- c(0.67, 0.84, 0.6, 0.18, 0.85, 0.47, 1.1, 0.65, 0.36)
+data <- data.frame(cbind(x,y))
+fit <- lm(y ~ x, data = data)
+summary(fit)
+```
+
+```{r}
+summary(fit)$sigma # residual
+```
+```{r}
+#install.packages("ggstance")
+library(jtools)
+summ(fit)
+```
+```{r}
+plot(fit$residuals)
+```
+
+
+Question 3
+In the mtcars data set, fit a linear regression model of weight (predictor) on mpg (outcome). Get a 95% confidence interval for the expected mpg at the average weight. What is the lower endpoint?
+
+```{r}
+data(mtcars)
+head(mtcars)
+```
+
+
+```{r}
+fit <- lm(mpg ~ wt, data=mtcars)
+summary(fit)
+```
+```{r}
+# create a sequence of values that we want to predict at
+newx = data.frame(wt = mean(mtcars$wt))
+newx
+```
+
+```{r}
+predict(fit, newdata= newx,interval = ("confidence")) #  returns interval for the line
+```
+
+```{r}
+#  returns interval for the prediction
+# predict(fit, newdata = newx,interval = ("prediction"))
+```
+Question 4
+Refer to the previous question. Read the help file for \verb|mtcars|mtcars. What is the weight coefficient interpreted as?
+```{r}
+?mtcars
+# The estimated expected change in mpg per 1,000 lb increase in weight.
+```
+Question 5
+Consider again the \verb|mtcars|mtcars data set and a linear regression model with mpg as predicted by weight (1,000 lbs). A new car is coming weighing 3000 pounds. Construct a 95% prediction interval for its mpg. What is the upper endpoint?
+```{r}
+# create a sequence of values that we want to predict at
+newx = data.frame(wt = 3)
+predict(fit, newdata= newx,interval = ("confidence")) #  returns interval for the line
+```
+
+```{r}
+predict(fit, newdata= newx,interval = ("prediction")) #  returns interval for the prediction
+```
+6.
+Consider again the \verb|mtcars|mtcars data set and a linear regression model with mpg as predicted by weight (in 1,000 lbs). A “short” ton is defined as 2,000 lbs.  Construct a  95% confidence interval for the expected change in mpg per 1 short ton increase in weight. Give the lower endpoint.
+```{r}
+fit <- lm(mpg ~ wt, data=mtcars)
+summary(fit)
+```
+
+```{r}
+library(jtools)
+summ(fit, confint = TRUE, digits = 3)
+```
+```{r}
+summ(fit, confint = TRUE, ci.width = .95)
+```
+```{r}
+fit <- lm(mpg ~ wt, data = mtcars)
+confint(fit)
+```
+```{r}
+confint(fit)[2, ] * 2
+```
+
+7.
+If my X from a linear regression is measured in centimeters and I convert it to meters what would happen to the slope coefficient?
+```{r}
+#It would get multiplied by 100.
+```
+8
+```{r}
+
+```
+9
+Question 9
+Refer back to the mtcars data set with mpg as an outcome and weight (wt) as the predictor. About what is the ratio of the the sum of the squared errors  when comparing a model with just an intercept (denominator) to the model with the intercept and slope (numerator)?
+```{r}
+fit <- lm(mpg ~ wt, data=mtcars)
+summary(fit)
+```
+
+```{r}
+fit <- lm(mpg ~ wt+0, data=mtcars)
+summary(fit)
+```
+```{r}
+fit1 <- lm(mpg ~ wt, data = mtcars)
+fit2 <- lm(mpg ~ 1, data = mtcars)
+1 - summary(fit1)$r.squared
+```
+```{r}
+fit1
+fit2
+```
+
+```{r}
+sse1 <- sum((predict(fit1) - mtcars$mpg)^2)
+sse2 <- sum((predict(fit2) - mtcars$mpg)^2)
+sse1/sse2
+```
+
+10.
+Question 10
+Do the residuals always have to sum to 0 in linear regression?
+```{r}
+
+```
+# Quiz 3
+1.
+Consider the \verb| mtcars| mtcars data set. Fit a model with mpg as the outcome that includes number of cylinders as a factor variable and weight as confounder. Give the adjusted estimate for the expected change in mpg comparing 8 cylinders to 4.
+```{r}
+library(tidyverse)
+data(mtcars)
+
+mtcars$cyl <- as.factor(mtcars$cyl)
+head(mtcars)
+```
+```{r}
+str(mtcars)
+```
+
+
+```{r}
+fit <- lm(mpg ~ cyl + wt,data=mtcars)
+summary(fit)
+```
+
+```{r}
+summary(fit)$coefficients[3, 1]#this is the relative change of cyl "8" comparing to cyl "4"
+```
+Question 2
+Consider the mtcars data set. Fit a model with mpg as the outcome that includes number of cylinders as a factor variable and weight as a possible confounding variable. Compare the effect of 8 versus 4 cylinders on mpg for the adjusted and unadjusted by weight models. Here, adjusted means including the weight variable as a term in the regression model and unadjusted means the model without weight included. What can be said about the effect comparing 8 and 4 cylinders after looking at models with and without weight included? ##Answer From Question 1, we know that the coefficients are for the adjusted model. Now we consider the unadjusted model.
+
+```{r}
+fit_unadjusted <- lm(mpg ~ cyl, data = mtcars)
+summary(fit_unadjusted)$coefficients
+```
+
+```{r}
+fit_adjust <- lm(mpg ~ cyl + wt,data=mtcars)
+summary(fit_adjust)
+```
+```{r}
+summary(fit_adjust)$coefficients[1, 1]
+summary(fit_adjust)$coefficients[3, 1]
+```
+
+```{r}
+effect_adjusted <- summary(fit_adjust)$coefficients[1, 1] + summary(fit_adjust)$coefficients[3, 1] 
+effect_unadjusted <- summary(fit_unadjusted)$coefficients[1, 1] + summary(fit_unadjusted)$coefficients[3, 1] 
+
+effect_adjusted # add weight : 27
+effect_unadjusted # no add weight : 15
+effect_adjusted - effect_unadjusted
+```
+Question 3
+Consider the mtcars data set. Fit a model with mpg as the outcome that considers number of cylinders as a factor variable and weight as confounder. Now fit a second model with mpg as the outcome model that considers the interaction between number of cylinders (as a factor variable) and weight. Give the P-value for the likelihood ratio test comparing the two models and suggest a model using 0.05 as a type I error rate significance benchmark. ##Answer
+```{r}
+fit1 <- lm(mpg ~ cyl + wt,data=mtcars)
+summary(fit1)
+```
+
+```{r}
+fit2 <- lm(mpg ~ cyl + wt + cyl*wt, data = mtcars)
+summary(fit2)
+```
+
+```{r}
+summary(fit1)$adj.r.squared
+summary(fit2)$adj.r.squared
+```
+There is no significant improvement when including the effects of interactions between wt and cyl. To check this point, let us do the likelihood ratio test.
+```{r}
+#install.packages("lmtest")
+library(lmtest)# a package for Likelihood Ratio Test of Nested Models.
+lrtest(fit1, fit2)
+```
+
+```{r}
+#The P-value is greater than 0.05, which means we failed to reject the null hypothesis, 
+#i.e., there is no necessary effects from interaction. Therefore, The P-value is larger 
+#than 0.05. So, according to our criterion, we would fail to reject, which suggests 
+#that the interaction terms may not be necessary.
+```
+
+Question 4
+Consider the mtcars data set. Fit a model with mpg as the outcome that includes number of cylinders as a factor variable and weight inlcuded in the model as
+
+lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)
+
+How is the wt coefficient interpretted?
+```{r}
+fit <- lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)
+summary(fit)
+```
+Question 5
+Consider the following data set
+
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+
+Give the hat diagonal for the most influential point
+```{r}
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+fit <- lm(y ~ x)
+summary(fit)
+```
+
+```{r}
+hatvalues(fit)
+```
+
+Question 6
+Consider the following data set
+
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+
+Give the slope dfbeta for the point with the highest hat value.
+```{r}
+x <- c(0.586, 0.166, -0.042, -0.614, 11.72)
+y <- c(0.549, -0.026, -0.127, -0.751, 1.344)
+fit <- lm(y ~ x)
+summary(fit)
+
+```
+```{r}
+hatvalues(fit)
+```
+
+```{r}
+influence.measures(fit)$infmat
+```
+
+```{r}
+influence.measures(fit)$infmat[5, 'dfb.x']
+```
+
+```{r}
+?influence.measures
+```
+
+```{r}
+fit <- lm(mpg ~ I(wt * 0.5) + factor(cyl), data = mtcars)
+influence.measures(fit)$infmat
+```
+
+# Quiz 4
+
+Question 1
+Consider the space shuttle data \verb|?shuttle|?shuttle in the \verb|MASS|MASS library. Consider modeling the use of the autolander as the outcome (variable name \verb|use|use). Fit a logistic regression model with autolander (variable auto) use (labeled as "auto" 1) versus not (0) as predicted by wind sign (variable wind). Give the estimated odds ratio for autolander use comparing head winds, labeled as "head" in the variable headwind (numerator) to tail winds (denominator).
+```{r}
+library(MASS)
+data(shuttle)
+shuttle
+```
+
+```{r}
+str(shuttle)
+```
+
+```{r}
+# run logistic regression on data
+logReg <- glm( use ~ ., data = shuttle,family="binomial")
+# print summary
+summary(logReg)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
