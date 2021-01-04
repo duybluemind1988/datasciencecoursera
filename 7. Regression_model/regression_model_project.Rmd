@@ -1,0 +1,126 @@
+---
+title: "regression model project"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+data("mtcars")
+mtcars
+```
+Motor Trend Car Road Tests
+
+Description
+
+The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+A data frame with 32 observations on 11 (numeric) variables.
+
+[, 1]	mpg	Miles/(US) gallon
+[, 2]	cyl	Number of cylinders
+[, 3]	disp	Displacement (cu.in.)
+[, 4]	hp	Gross horsepower
+[, 5]	drat	Rear axle ratio
+[, 6]	wt	Weight (1000 lbs)
+[, 7]	qsec	1/4 mile time
+[, 8]	vs	Engine (0 = V-shaped, 1 = straight)
+[, 9]	am	Transmission (0 = automatic, 1 = manual)
+[,10]	gear	Number of forward gears
+[,11]	carb	Number of carburetors
+
+## Data exploration
+
+```{r}
+require(graphics)
+pairs(mtcars, main = "mtcars data", gap = 1/4)
+```
+
+```{r}
+coplot(mpg ~ disp | as.factor(cyl), data = mtcars,
+       panel = panel.smooth, rows = 1)
+```
+
+```{r}
+## possibly more meaningful, e.g., for summary() or bivariate plots:
+mtcars2 <- within(mtcars, {
+   vs <- factor(vs, labels = c("V", "S"))
+   am <- factor(am, labels = c("automatic", "manual"))
+   cyl  <- ordered(cyl)
+   gear <- ordered(gear)
+   carb <- ordered(carb)
+})
+summary(mtcars2)
+```
+
+
+```{r}
+head(mtcars2)
+```
+
+## “Is an automatic or manual transmission better for MPG” 
+
+```{r}
+mtcars2 %>% 
+  ggplot(aes(am,mpg,fill=am))+
+  geom_boxplot()
+```
+
+```{r}
+mpg_auto <- mtcars2$mpg[mtcars2$am == "automatic"]
+mpg_manual <- mtcars2$mpg[mtcars2$am == "manual"]
+```
+
+Check assumtion: 
+Assumtion : Are the data from each of the 2 groups follow a normal distribution?
+
+```{r}
+library(ggpubr)
+ggqqplot(mpg_auto)
+ggqqplot(mpg_manual)
+```
+
+
+```{r}
+shapiro.test(mpg_auto)
+shapiro.test(mpg_manual)
+```
+p value > 0.05 so we cannot reject hypothesis that all data is normal distribution
+
+Assumption Do the two populations have the same variances?
+```{r}
+res.ftest <- var.test(mpg_auto,mpg_manual)
+res.ftest
+```
+The p-value of F-test is greater than the significance level alpha = 0.05. In conclusion, there is no significant difference between the variances of the two sets of data. Therefore, we can use the classic t-test witch assume equality of the two variances.
+
+```{r}
+t.test(mpg_auto, mpg_manual, alternative = "less", paired = FALSE, var.equal = TRUE, conf.level = 0.95)
+```
+As the p-value  is lower than 0.05, then, we reject the null hypothesis. it means that mpg automatic less than mpg manual
+
+## "Quantify the MPG difference between automatic and manual transmissions"  
+
+```{r}
+simple_model <- lm(mpg ~ am, data = mtcars)
+summary(simple_model)
+```
+The R2 value is 0.36 thus telling us this model only explains us 36% of the variance. As a result, we need to build a multivariate linear regression.
+
+```{r}
+complex_model <- lm(mpg ~.,data=mtcars)
+anova(simple_model,complex_model)
+```
+
+
+```{r}
+summary(complex_model)
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+

@@ -1,0 +1,149 @@
+---
+title: "Regression_model_learn"
+output: html_document
+---
+# Simple Linear Regression
+the data for this example can be found here
+the data contains the records 20 games for Baltimore Ravens, a professional American Football team
+there are 4 columns
+ravenWinNum = 1 for Raven win, 0 for Raven loss
+ravenWin = W for Raven win, L for Raven loss
+ravenScore = score of the Raven team during the match
+opponentScore = score of the Raven team during the match
+```{r}
+# load the data
+load("ravensData.rda")
+head(ravensData)
+```
+
+
+```{r}
+# perform linear regression
+summary(lm(ravenWinNum ~ ravenScore, data = ravensData))
+```
+Lower R2, poor fit to data
+
+# Logistic Regression
+
+```{r}
+# run logistic regression on data
+logRegRavens <- glm(ravenWinNum ~ ravenScore, data = ravensData,family="binomial")
+# print summary
+summary(logRegRavens)
+```
+
+
+```{r}
+# take e^coefs to find the log ratios
+exp(logRegRavens$coeff)
+```
+
+
+```{r}
+# take e^log confidence interval to find the confidence intervals
+exp(confint(logRegRavens))
+```
+# General Linear Models - Poisson Models
+
+- Poisson distribution is a useful model for counts and rates
+rate = count per unit of time
+linear regression with transformation is an alternative
+- count data examples
+calls to a call center
+number of flu cases in an area
+number of cars that cross a bridge
+- rate data examples
+percent of children passing a test
+percent of hits to a website from a country
+radioactive decay
+- Poisson model examples
+modeling web traffic hits incidence rates
+approximating binomial probabilities with small p and large n
+analyzing contingency table data (tabulated counts for categorical variables)
+
+```{r}
+# laod data
+load("gaData.rda")
+head(gaData)
+```
+
+
+```{r}
+# convert the dates to proper formats
+gaData$julian <- julian(gaData$date)
+head(gaData)
+```
+
+
+```{r}
+# plot visits vs dates
+plot(gaData$julian,gaData$visits,pch=19,col="darkgrey",xlab="Julian",ylab="Visits")
+```
+
+```{r}
+# construct Poisson regression model
+glm1 <- glm(gaData$visits ~ gaData$julian,family="poisson")
+summary(glm1)
+```
+
+
+```{r}
+# perform linear regression
+lm1 <- lm(gaData$visits ~ gaData$julian)
+summary(lm1)
+```
+
+
+```{r}
+# plot visits vs dates
+plot(gaData$julian,gaData$visits,pch=19,col="darkgrey",xlab="Julian",ylab="Visits")
+# plot linear regression line in red
+abline(lm1,col="red",lwd=3)
+# plot Poisson regression line in
+lines(gaData$julian,glm1$fitted,col="blue",lwd=3)
+```
+Note: the Poisson fit is non-linear since it is linear only on the log of the mean scale
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
