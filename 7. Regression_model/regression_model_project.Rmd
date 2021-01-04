@@ -1,12 +1,22 @@
 ---
 title: "regression model project"
-output: html_document
+Name: Nguyen Ngoc Duy
+Date: Jan, 04, 2021
+output:
+  pdf_document: default
+  html_document: default
 ---
+## Executive Summary
+
+In this report, we will examine the mtcars data set and explore how miles per gallon (MPG) is affected by different variables. In particularly, we will answer the following two questions: (1) Is an automatic or manual transmission better for MPG, and (2) Quantify the MPG difference between automatic and manual transmissions.
+
+From our analysis we can show that manual transmission has an MPG 2.8 greater than an automatic transmission.
+
 
 ```{r}
 library(tidyverse)
 data("mtcars")
-mtcars
+head(mtcars)
 ```
 Motor Trend Car Road Tests
 
@@ -28,17 +38,7 @@ A data frame with 32 observations on 11 (numeric) variables.
 [,10]	gear	Number of forward gears
 [,11]	carb	Number of carburetors
 
-## Data exploration
-
-```{r}
-require(graphics)
-pairs(mtcars, main = "mtcars data", gap = 1/4)
-```
-
-```{r}
-coplot(mpg ~ disp | as.factor(cyl), data = mtcars,
-       panel = panel.smooth, rows = 1)
-```
+## EDA
 
 ```{r}
 ## possibly more meaningful, e.g., for summary() or bivariate plots:
@@ -111,15 +111,22 @@ complex_model <- lm(mpg ~.,data=mtcars)
 anova(simple_model,complex_model)
 ```
 
-
+p-value < 0.05 so we can claim the complex_model model is significantly better than our simple_model model.
 ```{r}
 summary(complex_model)
 ```
+The model explains 86.9% of the variance and as a result, Thus, we can say the difference between automatic and manual transmissions is 2.81 MPG.
+## Appendix
 
-
+- Check residuals
 ```{r}
+par(mfrow = c(2,2))
+plot(complex_model)
 ```
-
+```{r}
+require(graphics)
+pairs(mtcars, main = "mtcars data", gap = 1/4)
+```
 
 ```{r}
 ```
