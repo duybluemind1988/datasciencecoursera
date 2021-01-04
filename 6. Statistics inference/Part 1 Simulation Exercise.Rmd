@@ -83,3 +83,4 @@ qqline(average_exponentials, col = 2)
 shapiro.test(average_exponentials)
 ```
 From the output, the p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
+

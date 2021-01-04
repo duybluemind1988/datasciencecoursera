@@ -408,43 +408,100 @@ influence.measures(fit)$infmat
 ```
 
 # Quiz 4
+```{r}
+library(tidyverse)
+```
 
 Question 1
 Consider the space shuttle data \verb|?shuttle|?shuttle in the \verb|MASS|MASS library. Consider modeling the use of the autolander as the outcome (variable name \verb|use|use). Fit a logistic regression model with autolander (variable auto) use (labeled as "auto" 1) versus not (0) as predicted by wind sign (variable wind). Give the estimated odds ratio for autolander use comparing head winds, labeled as "head" in the variable headwind (numerator) to tail winds (denominator).
+
 ```{r}
 library(MASS)
 data(shuttle)
-shuttle
+head(shuttle)
+```
+```{r}
+unique (shuttle$use)
+unique(shuttle$wind)
 ```
 
 ```{r}
-str(shuttle)
+# Auto lander predicted by wind sign
+fitAutoLander<-glm(shuttle$use~shuttle$wind, family="binomial")
+summary(fitAutoLander)
 ```
 
 ```{r}
-# run logistic regression on data
-logReg <- glm( use ~ ., data = shuttle,family="binomial")
-# print summary
-summary(logReg)
+# Coefficient 2 is the windtail refereced to windhead
+# coef[2] is the ration in the log scale so we must exponentiate it to go back to the original scale
+exp(summary(fitAutoLander$coef[2]))
+```
+```{r}
+exp(coef(fitAutoLander))[[2]]
+```
+
+Question 2
+Consider the previous problem. Give the estimated odds ratio for autolander use comparing head winds (numerator) to tail winds (denominator) adjusting for wind strength from the variable magn.
+```{r}
+unique(shuttle$magn)
 ```
 
 ```{r}
-
+fitAutoLanderMag<-glm(shuttle$use~shuttle$wind+shuttle$magn, family="binomial")
+summary(fitAutoLanderMag)
 ```
 
 ```{r}
+exp(coef(fitAutoLander))[[2]]
+```
 
+Question 3 - If you fit a logistic regression model to a binary variable, for example use of the autolander, then fit a logistic regression model for one minus the outcome (not using the autolander) what happens to the coefficients?
+```{r}
+relevel((shuttle$use), ref = "noauto") #noauto: 1, auto: 2
+```
+```{r}
+shuttle$use # auto: 1, no auto: 2
 ```
 
 ```{r}
+# Let's use relevel to noauto as the reference value
+fitNoAutoLander<-glm(relevel((shuttle$use),ref="noauto")~shuttle$wind, family="binomial")
+summary(fitNoAutoLander)
+```
 
+
+```{r}
+summary(fitAutoLander)
+# Coefficient 2 is the windtail refereced to windhead
+```
+**The coefficients reverse their signs.
+
+Question 4 - Consider the insect spray data InsectSprays. Fit a Poisson model using spray as a factor level. Report the estimated relative rate comapring spray A (numerator) to spray B (denominator).
+```{r}
+data("InsectSprays")
+InsectSprays
 ```
 
 ```{r}
-
+str(InsectSprays)
 ```
 
-```{r}
 
+```{r}
+#using relevel we can obtais the coefficients relatively to B
+fitArelB<-glm(InsectSprays$count~relevel(InsectSprays$spray,ref="B"),family="poisson")
+summary(fitArelB)
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
 ```
 
