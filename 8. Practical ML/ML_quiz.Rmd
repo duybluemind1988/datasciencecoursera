@@ -1,0 +1,514 @@
+---
+title: "ML"
+output: html_document
+---
+```{r}
+#install.packages("AppliedPredictiveModeling")
+library(AppliedPredictiveModeling)
+data(AlzheimerDisease)
+predictors
+diagnosis
+```
+
+
+```{r}
+library(caret)
+adData = data.frame(predictors)
+trainIndex = createDataPartition(diagnosis,p=0.5,list=FALSE)
+training = adData[trainIndex,]
+testing = adData[-trainIndex,]
+training
+testing
+```
+
+
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(1000)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+dim(training)
+dim(testing)
+```
+```{r}
+training
+```
+```{r}
+training2
+```
+
+
+```{r}
+library(GGally)
+library(Hmisc)
+## Using ggpair
+training2 <- training
+#cut CompressiveStrength into 4 levels.  This is the only way to work with colour in ggpair
+training2$CompressiveStrength <- cut2(training2$CompressiveStrength, g=4)
+ggpairs(data = training2, columns = c("FlyAsh","Age","CompressiveStrength"), mapping = ggplot2::aes(colour = CompressiveStrength))
+```
+
+
+```{r}
+library(AppliedPredictiveModeling)
+data(concrete)
+library(caret)
+set.seed(1000)
+inTrain = createDataPartition(mixtures$CompressiveStrength, p = 3/4)[[1]]
+training = mixtures[ inTrain,]
+testing = mixtures[-inTrain,]
+```
+
+```{r}
+summary(training)
+```
+
+```{r}
+hist(training$Superplasticizer)
+```
+
+
+```{r}
+hist(log(training$Superplasticizer))
+```
+
+
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+
+
+```{r}
+trainingIL <- training[,grep("^IL", names(training))]
+trainingIL
+```
+
+
+```{r}
+procTrain <- preProcess(trainingIL, method = "pca", thresh = 0.9 )
+procTrain
+```
+
+
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+```
+
+```{r}
+diagnosis_train <- training$diagnosis
+```
+
+```{r}
+trainingIL <- training[,grep("^IL", names(training))]
+trainingIL_combine<-cbind(diagnosis_train,trainingIL)
+trainingIL_combine
+```
+
+
+```{r}
+pca_train <- preProcess(trainingIL, method = "pca", thresh = 0.9 )
+trainingIL_pca <- predict(pca_train,trainingIL)
+trainingIL_pca_combine<-cbind(diagnosis_train,trainingIL_pca)
+trainingIL_pca_combine
+```
+```{r}
+testingIL <- testing[,grep("^IL", names(testing))]
+testingIL_combine<-cbind(testing$diagnosis,testingIL)
+testingIL_pca <- predict(pca_train,testingIL)
+testingIL_pca_combine<-cbind(testing$diagnosis,testingIL_pca)
+testingIL_pca_combine
+```
+
+
+```{r}
+model <- train(diagnosis_train~., data=trainingIL_combine, method="glm")
+summary(model$finalModel)
+```
+
+
+```{r}
+model_pca <- train(diagnosis_train~., data=trainingIL_pca_combine, method="glm")
+summary(model_pca$finalModel)
+```
+
+
+```{r}
+pred <- predict(model, testingIL_combine)
+confusionMatrix(pred,testingIL_combine[["testing$diagnosis"]])
+```
+```{r}
+pred <- predict(model_pca, testingIL_pca_combine)
+confusionMatrix(pred,testingIL_pca_combine[["testing$diagnosis"]])
+```
+```{r}
+library(caret)
+library(AppliedPredictiveModeling)
+set.seed(3433)
+data(AlzheimerDisease)
+adData = data.frame(diagnosis,predictors)
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+training = adData[ inTrain,]
+testing = adData[-inTrain,]
+
+# grep all columns with IL and diagnosis in the traning and testing set
+trainingIL <- training[,grep("^IL|diagnosis", names(training))]
+testingIL <- testing[,grep("^IL|diagnosis", names(testing))]
+
+# non-PCA
+model <- train(diagnosis ~ ., data = trainingIL, method = "glm")
+predict_model <- predict(model, newdata= testingIL)
+matrix_model <- confusionMatrix(predict_model, testingIL$diagnosis)
+matrix_model$overall[1]
+```
+```{r}
+# PCA
+modelPCA <- train(diagnosis ~., data = trainingIL, method = "glm", preProcess = "pca",trControl=trainControl(preProcOptions=list(thresh=0.8)))
+matrix_modelPCA <- confusionMatrix(testingIL$diagnosis, predict(modelPCA, testingIL))
+matrix_modelPCA$overall[1]
+```
+
+
+```{r}
+library(AppliedPredictiveModeling)
+data(segmentationOriginal)
+library(caret)
+segmentationOriginal
+```
+
+
+```{r}
+set.seed(125)
+# 1. Subset the data to a training set and testing set based on the Case variable in the data set. 
+inTrain <- createDataPartition(y = segmentationOriginal$Case, p = 0.6, 
+                               list = FALSE) # 60% training
+training <- segmentationOriginal[inTrain, ]
+testing <- segmentationOriginal[-inTrain, ]
+# 2. Set the seed to 125 and fit a CART model with the rpart method using all predictor variables and default caret settings. (The outcome class is contained in a factor variable called Class with levels "PS" for poorly segmented and "WS" for well segmented.)
+set.seed(125)
+modFit <- train(Class ~ ., method = "rpart", data = training)
+modFit$finalModel
+```
+
+
+```{r}
+library(rattle)
+fancyRpartPlot(modFit$finalModel)
+```
+
+```{r}
+#install.packages("pgmm")
+library(pgmm)
+data(olive)
+olive = olive[, -1]
+olive
+```
+
+
+```{r}
+str(olive)
+```
+```{r}
+unique(olive$Area)
+```
+```{r}
+library(caret)
+set.seed(125)
+modFit <- train(Area ~ ., method = "rpart", data = olive)
+modFit$finalModel
+```
+```{r}
+newdata = as.data.frame(t(colMeans(olive)))
+newdata
+```
+
+```{r}
+predict(modFit,newdata)
+```
+
+
+```{r}
+install.packages("ElemStatLearn")
+library(ElemStatLearn)
+data(SAheart)
+set.seed(8484)
+train = sample(1:dim(SAheart)[1],size=dim(SAheart)[1]/2,replace=F)
+trainSA = SAheart[train,]
+testSA = SAheart[-train,]
+```
+
+
+```{r}
+data(vowel.train)
+
+data(vowel.test)
+head(vowel.train)
+```
+
+```{r}
+vowel.train$y <- factor(vowel.train$y)
+vowel.test$y <- factor(vowel.test$y)
+```
+
+```{r}
+model_rf <- train(y~. , method="ranger",data=vowel.train)
+model_rf
+```
+```{r}
+model_rf_predict <- predict(model_rf,vowel.test)
+report <- confusionMatrix(vowel.test$y, model_rf_predict)
+report$overall[1]
+```
+
+
+```{r}
+model_gbm <- train(y~. , method="gbm",data=vowel.train,verbose=FALSE)
+model_gbm
+```
+
+
+```{r}
+model_gbm_predict <- predict(model_gbm,vowel.test)
+report <- confusionMatrix(vowel.test$y, model_gbm_predict)
+report$overall[1]
+```
+```{r}
+cm_agree<-confusionMatrix(model_rf_predict,model_gbm_predict)
+cm_agree$overall['Accuracy']
+```
+
+
+```{r}
+library(caret)
+
+library(gbm)
+
+set.seed(3433)
+
+library(AppliedPredictiveModeling)
+
+data(AlzheimerDisease)
+
+adData = data.frame(diagnosis,predictors)
+
+inTrain = createDataPartition(adData$diagnosis, p = 3/4)[[1]]
+
+training = adData[ inTrain,]
+
+testing = adData[-inTrain,]
+```
+```{r}
+training
+```
+
+
+```{r}
+#install.packages("caretEnsemble")
+library(caretEnsemble)
+```
+
+
+```{r}
+my_control <- trainControl(
+  method="boot",
+  #number=25,
+  savePredictions="final",
+  classProbs=TRUE,
+  #index=createResample(training$Class, 25),
+  summaryFunction=twoClassSummary
+  )
+
+model_list <- caretList(
+  diagnosis~., data=training,
+  trControl=my_control,
+  methodList=c("ranger", "gbm","lda")
+  )
+model_list
+```
+
+```{r}
+greedy_ensemble <- caretEnsemble(
+  model_list,
+    metric="ROC",
+  trControl=trainControl(
+    number=3,
+    summaryFunction=twoClassSummary,
+    classProbs=TRUE
+    ))
+greedy_ensemble
+```
+
+```{r}
+model_gbm_predict <- predict(greedy_ensemble,testing)
+report <- confusionMatrix(testing$diagnosis, model_gbm_predict)
+report
+```
+
+```{r}
+set.seed(62433)
+modelFit_rf<-train(diagnosis~., method="ranger", data=training)
+modelFit_gbm<-train(diagnosis~., method="gbm", data=training,verbose=FALSE)
+modelFit_lda<-train(diagnosis~., method="lda", data=training)
+```
+
+
+```{r}
+predict_rf<-predict(modelFit_rf,newdata=testing)
+predict_gbm<-predict(modelFit_gbm,newdata=testing)
+predict_lda<-predict(modelFit_lda,newdata=testing)
+confusionMatrix(predict_rf, testing$diagnosis)$overall['Accuracy']
+confusionMatrix(predict_gbm, testing$diagnosis)$overall['Accuracy']
+confusionMatrix(predict_lda, testing$diagnosis)$overall['Accuracy']
+```
+
+
+```{r}
+#create a new dataframe with the predictions
+predDF <- data.frame(predict_rf, predict_gbm, predict_lda, diagnosis = testing$diagnosis)
+predDF
+```
+
+
+```{r}
+#create a new model using the new data frame and rf method
+combModFit <- train(diagnosis ~.,method="rf",data=predDF)
+combModFit
+```
+
+
+```{r}
+#predict values and calculate the confusion matrix to check the accuracy
+combPred <- predict(combModFit, predDF)
+confusionMatrix(combPred, testing$diagnosis)$overall['Accuracy']
+```
+
+
+```{r}
+set.seed(3523)
+
+library(AppliedPredictiveModeling)
+
+data(concrete)
+
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+
+training = concrete[ inTrain,]
+
+testing = concrete[-inTrain,]
+head(training)
+```
+```{r}
+library(elasticnet)
+model <- train(CompressiveStrength ~. ,method="lasso",data=training )
+model$finalModel
+```
+
+```{r}
+plot.enet(model$finalModel, xvar = "penalty", use.color = TRUE)
+```
+
+
+```{r}
+library(lubridate) # For year() function below
+
+dat = read.csv("gaData.csv")
+
+training = dat[year(dat$date) < 2012,]
+
+testing = dat[(year(dat$date)) > 2011,]
+
+tstrain = ts(training$visitsTumblr)
+head(training)
+head(testing)
+tstrain
+```
+
+
+```{r}
+plot(tstrain)
+```
+
+
+```{r}
+library(forecast)
+fit <- bats(tstrain)
+fit
+```
+
+
+```{r}
+fcast <- forecast(fit, h=nrow(testing))
+plot(forecast(fcast))
+```
+
+
+```{r}
+fcast
+```
+
+
+```{r}
+fcast_lower95 = fcast$lower[,2]
+fcast_upper95 = fcast$upper[,2]
+table( (testing$visitsTumblr>fcast_lower95) & (testing$visitsTumblr<fcast_upper95) )
+```
+
+```{r}
+testing$visitsTumblr
+```
+
+
+```{r}
+set.seed(3523)
+library(caret)
+library(AppliedPredictiveModeling)
+
+data(concrete)
+
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+
+training = concrete[ inTrain,]
+
+testing = concrete[-inTrain,]
+head(training)
+```
+
+
+```{r}
+#install.packages("e1071")
+library(e1071)
+library(forecast)
+set.seed(325)
+modFit<-svm(CompressiveStrength~., data=training)
+predict_svm<-predict(modFit, testing)
+accuracy(predict_svm, testing$CompressiveStrength)
+```
+
+
+```{r}
+set.seed(325)
+modFit<-train(CompressiveStrength~.,method="svmLinear", data=training)
+predict_svm<-predict(modFit, testing)
+accuracy(predict_svm, testing$CompressiveStrength)
+```
+
+
+```{r}
+```
+
