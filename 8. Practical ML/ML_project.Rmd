@@ -1,9 +1,191 @@
 ---
 title: "ML project"
 name: Nguyen Ngoc Duy
-output: html_document
+output:
+  html_document:
+    df_print: paged
 ---
+## Get data
 ```{r}
+library(tidyverse)
+library(data.table)
+library(caret)
+library(recipes)
+```
+
+
+```{r}
+
+training <- fread("pml-training.csv")
+testing <- fread("pml-testing.csv")
+head(training)
+head(testing)
+```
+```{r}
+dim(training)
+```
+
+
+```{r}
+table(training$classe)
+```
+Check NA
+```{r}
+# Check which column have na value > 50 %
+col_high_na_value<-training[, which(colMeans(is.na(training)) > 0)]
+col_high_na_value
+```
+
+## Prepare data for machine learning
+
+```{r}
+# all character columns to factor:
+training <- mutate_if(training, is.character, as.factor)
+testing <- mutate_if(testing, is.character, as.factor)
+#data$Attrition<-ifelse(data$Attrition=="Yes", 1, 0)
+# Create training (80%) and test (20%) sets for the 
+set.seed(430)
+split = createDataPartition(training$classe, p =0.8, list = FALSE)
+train = training[split, ]
+valid = training[-split, ]
+dim(train)
+dim(valid)
+```
+
+```{r}
+table(train$classe)
+table(valid$classe)
+```
+While your project’s needs may vary, here is a suggested order of potential steps that should work for most problems:
+
+Filter out zero or near-zero variance features.
+Perform imputation if required.
+Normalize to resolve numeric feature skewness.
+Standardize (center and scale) numeric features.
+
+```{r}
+blueprint <- recipe(classe ~ ., data = train) %>%
+  step_nzv(all_numeric(), -all_outcomes())  %>% #Remove near-zero variance features like sex, yes/no...
+  step_YeoJohnson(all_numeric(),-all_outcomes()) %>% # Remove skewness
+  step_center(all_numeric(), -all_outcomes()) %>% # center 
+  step_scale(all_numeric(), -all_outcomes()) #%>% # scale
+blueprint
+```
+Next, we need to train this blueprint on some training data. Remember, there are many feature engineering steps that we do not want to train on the test data (e.g., standardize and PCA) as this would create data leakage. So in this step we estimate these parameters based on the training data of interest.
+```{r}
+prepare <- prep(blueprint, training = train)
+```
+
+Lastly, we can apply our blueprint to new data (e.g., the training data or future test data) with bake()
+
+```{r}
+baked_train <- bake(prepare, new_data = train)
+baked_valid <- bake(prepare, new_data = valid)
+baked_test <- bake(prepare, new_data = testing)
+head(baked_train)
+```
+
+##  H2O  machine learning model
+I choose H2O machine learning model because it is very good accuracy and very fast
+
+```{r}
+library(h2o)
+h2o.no_progress()
+h2o.init()
+```
+
+
+```{r}
+# convert training data to h2o object
+train_h2o <- as.h2o(baked_train)
+valid_h2o <- as.h2o(baked_valid)
+test_h2o <- as.h2o(baked_test)
+# set the response column to Sale_Price
+response <- "classe"
+n_features <- length(setdiff(names(baked_train), "classe"))
+# set the predictor names
+predictors <- setdiff(colnames(baked_train), response)
+```
+
+Training 3 models
+```{r}
+# XGBOOST model
+h2o_xgboost <- h2o.xgboost(
+    x = predictors, 
+    y = response,
+    training_frame = train_h2o, 
+    #family='multinomial',
+    seed = 123
+)
+
+# Gradient boosting 
+h2o_gbm <- h2o.gbm(
+    x = predictors, 
+    y = response,
+    training_frame = train_h2o, 
+    #family='multinomial',
+    #ntrees = n_features * 10, # very slow if high dim, not pca
+    #learn_rate=0.2,
+    seed = 123
+)
+# Generalized linear model
+h2o_glm <- h2o.glm(
+    x = predictors, 
+    y = response,
+    training_frame = train_h2o, 
+    family='multinomial',
+    #lambda_search = TRUE,
+    seed = 123
+)
+```
+
+
+## Validation set performance:
+```{r}
+#which( colnames(valid_h2o)=="classe" ) #127
+#valid_h2o<-valid_h2o[,-127] 
+#which( colnames(valid_h2o)=="classe" )
+```
+
+```{r}
+# Check model performance in test set
+h2o.performance(h2o_xgboost, newdata = valid_h2o)
+```
+Note: accuracy for 5 class: 99.97%
+```{r}
+h2o.performance(h2o_gbm, newdata = valid_h2o)
+```
+Note: accuracy for 5 class: 100%
+
+```{r}
+h2o.performance(h2o_glm, newdata = valid_h2o)
+```
+Note: accuracy for 5 class: 99.26 %
+
+Best validation performance: h2o_gbm model
+
+## Test set performance:
+
+Apply h2o_gbm model to test set:
+```{r}
+test_h2o
+```
+
+```{r}
+result <- h2o.predict(h2o_gbm, newdata = test_h2o)
+head(result,20)
+```
+
+```{r}
+result <- h2o.predict(h2o_xgboost, newdata = test_h2o)
+head(result,20)
+```
+### Explain model
+
+```{r}
+h2o.varimp_plot(h2o_xgboost)
+h2o.varimp_plot(h2o_gbm)
+h2o.varimp_plot(h2o_glm)
 ```
 
 
@@ -23,38 +205,4 @@ output: html_document
 ```
 
 
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
 

@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+output: html_document
+---
+## Reading data
+```{r}
+library(tidyverse)
+library(data.table)
+library(caret)
+library(recipes)
+```
+
+
+```{r}
+training <- fread("pml-training.csv")
+testing <- fread("pml-testing.csv")
+head(training)
+head(testing)
+```
+
+
+```{r}
+dim(training)
+dim(testing)
+```
+
+## Cleaning Data
+We clean the Near Zero Variance Variables.
+```{r}
+NZV <- nearZeroVar(training, saveMetrics = TRUE)
+head(NZV, 20)
+```
+
+```{r}
+column_near_zero_var <-nearZeroVar(training)
+column_near_zero_var
+```
+```{r}
+length(column_near_zero_var)
+class(column_near_zero_var)
+```
+
+```{r}
+training <- training[,-..column_near_zero_var]
+testing <- testing[,-..column_near_zero_var]
+```
+
+
+```{r}
+dim(training)
+dim(testing)
+```
+
+Removing some columns of the dataset that do not contribute much to the accelerometer measurements.
+```{r}
+head(training)
+```
+
+```{r}
+regex <- grepl("^X|timestamp|user_name", names(training))
+regex
+```
+```{r}
+# training[,.SD,.SDcols=-c(2,3,4,5)]
+training <- training[,.SD,.SDcols=-regex]
+testing <- testing[,.SD,.SDcols=-regex]
+```
+
+
