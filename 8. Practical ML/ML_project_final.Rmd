@@ -25,7 +25,7 @@ dim(testing)
 ```
 
 ## Cleaning Data
-We clean the Near Zero Variance Variables.
+### Clean the Near Zero Variance Variables.
 ```{r}
 NZV <- nearZeroVar(training, saveMetrics = TRUE)
 head(NZV, 20)
@@ -35,6 +35,7 @@ head(NZV, 20)
 column_near_zero_var <-nearZeroVar(training)
 column_near_zero_var
 ```
+
 ```{r}
 length(column_near_zero_var)
 class(column_near_zero_var)
@@ -51,7 +52,7 @@ dim(training)
 dim(testing)
 ```
 
-Removing some columns of the dataset that do not contribute much to the accelerometer measurements.
+### Removing some columns of the dataset that do not contribute much to the accelerometer measurements.
 ```{r}
 head(training)
 ```
@@ -60,10 +61,130 @@ head(training)
 regex <- grepl("^X|timestamp|user_name", names(training))
 regex
 ```
+
 ```{r}
 # training[,.SD,.SDcols=-c(2,3,4,5)]
 training <- training[,.SD,.SDcols=-regex]
 testing <- testing[,.SD,.SDcols=-regex]
+```
+
+```{r}
+dim(training)
+dim(testing)
+```
+### Removing columns that contain NA's.
+
+```{r}
+# Check which column have na value > 50 %
+col_high_na_value<-training[, which(colMeans(is.na(training)) > 0.5)]
+col_high_na_value
+```
+
+
+```{r}
+training <- training[,.SD,.SDcols=-col_high_na_value]
+testing <- testing[,.SD,.SDcols=-col_high_na_value]
+```
+
+
+```{r}
+dim(training)
+dim(testing)
+```
+## Partitioning Training Set
+
+```{r}
+set.seed(430)
+split = createDataPartition(training$classe, p =0.8, list = FALSE)
+train = training[split, ]
+valid = training[-split, ]
+dim(train)
+dim(valid)
+```
+## Try Random forest model
+```{r}
+cv <- trainControl(
+  method = "cv", 
+  number = 5)
+start_time <- lubridate::minute(Sys.time())
+
+modelRF <- train(classe ~ ., data = training, method = "rf",trControl=cv)
+
+end_time <- lubridate::minute(Sys.time())
+time <- (end_time - start_time)
+print(time) # 11 min cho 5 cv, 2 min cho 1 cv
+```
+
+
+```{r}
+predictRF <- predict(modelRF, valid)
+confusionMatrix(factor(valid$classe), predictRF)
+```
+
+
+## Try XGBOOST model
+```{r}
+library(xgboost)
+```
+```{r}
+train <- train[, classe:=as.factor(classe)]
+valie <- valid[, classe:=as.factor(classe)]
+train <- train[, classe:=as.integer(classe)-1]
+valid <- valid[, classe:=as.integer(classe)-1]
+
+```
+
+```{r}
+train_matrix <- as.matrix(train[,-c("classe")])
+train_label_matrix <- as.matrix(train[,c("classe")]) 
+
+valid_matrix <- as.matrix(valid[,-c("classe")])
+valid_label_matrix <- as.matrix(valid[,c("classe")]) 
+```
+
+
+
+```{r}
+dtrain <- xgb.DMatrix(data =train_matrix, label =label_matrix )
+dvalid <- xgb.DMatrix(data =valid_matrix, label =valid_label_matrix )
+```
+
+```{r}
+#num_class = length(levels(species))
+num_class = 5
+params = list(
+  booster="gbtree",
+  eta=0.001,
+  max_depth=5,
+  gamma=3,
+  subsample=0.75,
+  colsample_bytree=1,
+  objective="multi:softprob",
+  eval_metric="mlogloss",
+  num_class=num_class
+)
+```
+
+
+
+```{r}
+# Train the XGBoost classifer
+xgb.fit=xgb.train(
+  params=params,
+  data=dtrain,
+  nrounds=100,
+  nthreads=2,
+  early_stopping_rounds=10,
+  watchlist=list(val1=dtrain,val2=dvalid),
+  verbose=0
+)
+
+# Review the final model and results
+xgb.fit
+```
+
+
+```{r}
 ```
 
 
