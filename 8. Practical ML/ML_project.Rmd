@@ -180,6 +180,11 @@ head(result,20)
 result <- h2o.predict(h2o_xgboost, newdata = test_h2o)
 head(result,20)
 ```
+```{r}
+result <- h2o.predict(h2o_glm, newdata = test_h2o)
+head(result,20)
+```
+
 ### Explain model
 
 ```{r}
@@ -187,6 +192,128 @@ h2o.varimp_plot(h2o_xgboost)
 h2o.varimp_plot(h2o_gbm)
 h2o.varimp_plot(h2o_glm)
 ```
+```{r}
+STOP HERE
+```
+
+# OTHER METHOD
+## Try Random forest model
+```{r}
+#library(doParallel)	
+#cl <-makePSOCKcluster(5)	
+#registerDoParallel(cl)	
+```
+
+```{r}
+cv <- trainControl(
+  method = "cv", 
+  number = 4)
+start_time <- lubridate::minute(Sys.time())
+
+modelRF <- train(classe ~ ., data = train, method = "rf",#trControl=cv
+                 )
+
+end_time <- lubridate::minute(Sys.time())
+time <- (end_time - start_time)
+print(time) # 11 min cho 5 cv, 2 min cho 1 cv
+```
+
+
+```{r}
+predictRF <- predict(modelRF, valid)
+confusionMatrix(factor(valid$classe), predictRF)
+```
+
+## Predicting The Manner of Exercise for Test Data Set
+```{r}
+predict(modelRF, testing)
+```
+[1] B A B A A E D B A A B C B A E E A B B B
+Levels: A B C D E
+
+## Appendix
+## Try XGBOOST model (Very fast)
+
+```{r}
+library(xgboost)
+```
+```{r}
+set.seed(430)
+split = createDataPartition(training$classe, p =0.8, list = FALSE)
+train = training[split, ]
+valid = training[-split, ]
+
+train <- train[, classe:=as.factor(classe)]
+valid <- valid[, classe:=as.factor(classe)]
+class_name_original = train[,c("classe")]
+train <- train[, classe:=as.integer(classe)-1]
+valid <- valid[, classe:=as.integer(classe)-1]
+
+train_matrix <- as.matrix(train[,-c("classe")])
+train_label_matrix <- as.matrix(train[,c("classe")]) 
+
+valid_matrix <- as.matrix(valid[,-c("classe")])
+valid_label_matrix <- as.matrix(valid[,c("classe")]) 
+
+test_matrix <- as.matrix(testing)
+```
+
+```{r}
+
+```
+
+
+```{r}
+dtrain <- xgb.DMatrix(data =train_matrix, label =train_label_matrix )
+dvalid <- xgb.DMatrix(data =valid_matrix, label =valid_label_matrix )
+dtest <- xgb.DMatrix(data =test_matrix)
+```
+
+```{r}
+#num_class = length(levels(species))
+num_class = 5
+params = list(
+  booster="gbtree",
+  eta=0.001,
+  max_depth=5,
+  gamma=3,
+  subsample=0.75,
+  colsample_bytree=1,
+  objective="multi:softprob",
+  eval_metric="mlogloss", #Multiclass logloss.
+  num_class=num_class
+)
+```
+
+```{r}
+# Train the XGBoost classifer
+xgb.fit=xgb.train(
+  params=params,
+  data=dtrain,
+  nrounds=100,
+  nthreads=2,
+  early_stopping_rounds=10,
+  watchlist=list(val1=dtrain,val2=dvalid),
+  verbose=0
+)
+
+# Review the final model and results
+xgb.fit
+```
+
+```{r}
+# Predict outcomes with the test data
+xgb.pred = predict(xgb.fit,dvalid,reshape=T)
+xgb.pred = as.data.frame(xgb.pred)
+colnames(xgb.pred) = levels(class_name_original)
+```
+
+```{r}
+# Use the predicted label with the highest probability
+xgb.pred$prediction = apply(xgb.pred,1,function(x) colnames(xgb.pred)[which.max(x)])
+xgb.pred$label = levels(class_name_original)[valid+1]
+```
+
 
 
 ```{r}
