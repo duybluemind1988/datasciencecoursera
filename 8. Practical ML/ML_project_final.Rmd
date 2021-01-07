@@ -121,4 +121,39 @@ confusionMatrix(factor(valid$classe), predict)
 ```{r}
 #predict(model_lda, testing)
 ```
+## Try pda model 
+
+```{r}
+start_time <- lubridate::minute(Sys.time())
+model <- train(classe ~ ., data = train, method = "pda",verbose=FALSE#trControl=cv
+                 )
+
+end_time <- lubridate::minute(Sys.time())
+time <- (end_time - start_time)
+print(time) # < 1 min
+model
+```
+```{r}
+predict<- predict(model, valid[,-c("classe")])
+confusionMatrix(factor(valid$classe), predict)
+predict(model, testing)
+```
+## Try gbm model
+
+```{r}
+start_time <- lubridate::minute(Sys.time())
+model <- train(classe ~ ., data = train, method = "gbm",verbose=FALSE#trControl=cv
+                 )
+
+end_time <- lubridate::minute(Sys.time())
+time <- (end_time - start_time)
+print(time) # < 1 min
+model
+```
+
+```{r}
+predict<- predict(model, valid[,-c("classe")])
+confusionMatrix(factor(valid$classe), predict)
+predict(model, testing)
+```
 

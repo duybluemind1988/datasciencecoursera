@@ -1,0 +1,23 @@
+---
+title: "Coursera-Developing Data Products-Week 2-Assignment"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+
+## Crate the map to show my current city
+## January 7, 2021
+```{r}
+#install.packages("leaflet")
+library(leaflet)
+
+m <- leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng=106.773, lat=10.8119, popup="My place")
+m  # Print the map
+```
+

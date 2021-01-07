@@ -1,0 +1,131 @@
+---
+title: "Data Product Week 3 Assignment"
+author: "Nguyen Ngoc Duy"
+date: "Jan 7, 2021"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r message = FALSE,warning = FALSE}
+library(quantmod)
+library(nortest)
+library(tidyverse)
+library(plotly)
+```
+
+```{r message = FALSE,warning = FALSE,include = FALSE}
+# Fetch Data --------------------------------------------------------------
+#btc.usd <- new.env()
+getSymbols("BTC-USD", src = "yahoo", from = as.Date("2017-11-01"), to = Sys.Date())
+btc.usd<-`BTC-USD`
+btc <- as_tibble(btc.usd)
+btc$date <- as.Date(as.character(index(btc.usd)))
+colnames(btc) <- c("Open","High","Low","Close","Volumne","Adjusted","Date")
+#head(btc)
+```
+## BTC chart
+
+```{r warning = FALSE}
+fig1 <- btc %>% plot_ly(x = ~Date, type="candlestick",
+                       open = ~Open, close = ~Close,
+                       high = ~High, low = ~Low) 
+fig1 <- fig1 %>% add_lines(x = ~Date, y = ~Open, line = list(color = 'black', width = 0.75), inherit = F)
+fig1 <- fig1 %>% layout(showlegend = FALSE)
+
+# plot volume bar chart
+fig2 <- btc %>% plot_ly(x=~Date, y=~Volumne, type='bar', name = "Volume") 
+fig2 <- fig2 %>% layout(yaxis = list(title = "Volume"))
+
+fig <- subplot(fig1, fig2, heights = c(0.7,0.2), nrows=2,
+             shareX = TRUE, titleY = TRUE)
+# create rangeselector buttons
+rs <- list(visible = TRUE, x = 0.5, y = -0.055,
+           xanchor = 'center', yref = 'paper',
+           font = list(size = 9),
+           buttons = list(
+             list(count=1,
+                  label='RESET',
+                  step='all'),
+             list(count=1,
+                  label='1 YR',
+                  step='year',
+                  stepmode='backward'),
+             list(count=3,
+                  label='3 MO',
+                  step='month',
+                  stepmode='backward'),
+             list(count=1,
+                  label='1 MO',
+                  step='month',
+                  stepmode='backward')
+  
+           ))
+fig <- fig %>% layout(title = paste("BTC-USD: 2017-11-1 -",Sys.Date()),
+         xaxis = list(rangeselector = rs),
+         legend = list(orientation = 'h', x = 0.5, y = 1,
+                       xanchor = 'center', yref = 'paper',
+                       font = list(size = 10),
+                       bgcolor = 'transparent'))
+fig
+```
+
+```{r message = FALSE, warning = FALSE,include = FALSE}
+getSymbols("ETH-USD", src = "yahoo", from = as.Date("2017-11-01"), to = Sys.Date())
+
+eth.usd<-`ETH-USD`
+
+eth <- as_tibble(eth.usd)
+eth$date <- as.Date(as.character(index(eth.usd)))
+colnames(eth) <- c("Open","High","Low","Close","Volumne","Adjusted","Date")
+#head(eth)
+```
+
+## ETH chart
+
+```{r warning = FALSE}
+fig1 <- eth %>% plot_ly(x = ~Date, type="candlestick",
+                       open = ~Open, close = ~Close,
+                       high = ~High, low = ~Low) 
+fig1 <- fig1 %>% add_lines(x = ~Date, y = ~Open, line = list(color = 'black', width = 0.75), inherit = F)
+fig1 <- fig1 %>% layout(showlegend = FALSE)
+
+# plot volume bar chart
+fig2 <- eth %>% plot_ly(x=~Date, y=~Volumne, type='bar', name = "Volume") 
+fig2 <- fig2 %>% layout(yaxis = list(title = "Volume"))
+
+fig <- subplot(fig1, fig2, heights = c(0.7,0.2), nrows=2,
+             shareX = TRUE, titleY = TRUE)
+# create rangeselector buttons
+rs <- list(visible = TRUE, x = 0.5, y = -0.055,
+           xanchor = 'center', yref = 'paper',
+           font = list(size = 9),
+           buttons = list(
+             list(count=1,
+                  label='RESET',
+                  step='all'),
+             list(count=1,
+                  label='1 YR',
+                  step='year',
+                  stepmode='backward'),
+             list(count=3,
+                  label='3 MO',
+                  step='month',
+                  stepmode='backward'),
+             list(count=1,
+                  label='1 MO',
+                  step='month',
+                  stepmode='backward')
+  
+           ))
+fig <- fig %>% layout(title = paste("ETH-USD: 2017-11-1 -",Sys.Date()),
+         xaxis = list(rangeselector = rs),
+         legend = list(orientation = 'h', x = 0.5, y = 1,
+                       xanchor = 'center', yref = 'paper',
+                       font = list(size = 10),
+                       bgcolor = 'transparent'))
+fig
+
+```
