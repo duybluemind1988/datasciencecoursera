@@ -2238,7 +2238,7 @@ p3 <- plot_features(explanation_gbm, ncol = 1) + ggtitle("gbm")
 gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
 ```
 
-## Machine learning model
+## Machine learning model KAGGLE
 ```{r}
 library(tidyverse) # metapackage of all tidyverse packages
 library(data.table) # fast read file
@@ -2272,8 +2272,7 @@ dim(test)
 
 ```{r}
 blueprint <- recipe(Attrition ~ ., data = train) %>%
-  step_nzv(all_nominal())  %>% #Remove near-zero variance features like sex, yes/no...
-  step_nzv(all_numeric(), -all_outcomes())  %>%
+  step_nzv(all_numeric(), -all_outcomes())  %>%  #Remove near-zero variance features like sex, yes/no...
   #step_knnimpute(all_predictors(), neighbors = 6) %>%  # Impute, very slow in large data in train, need step outside
   step_YeoJohnson(all_numeric(),-all_outcomes()) %>% # Remove skewness
   #step_integer(matches("Qual|Cond|QC|Qu")) %>% # Ordinal encoder
@@ -2311,7 +2310,6 @@ n_features <- length(setdiff(names(baked_train), "Attrition"))
 predictors <- setdiff(colnames(baked_train), response)
 ```
 
-
 ```{r}
 start_time <- lubridate::minute(Sys.time())
 h2o_model <- h2o.xgboost(
@@ -2326,13 +2324,11 @@ time <- (end_time - start_time)
 print(time)
 ```
 
-
 ```{r}
 # Apply h2o model to test set
 pred <-h2o.predict(h2o_model, newdata = test_h2o)
 h2o.performance(h2o_model,test_h2o)
 ```
-
 
 ```{r}
 # save the model
@@ -2348,6 +2344,135 @@ saved_model <- h2o.loadModel(model_path)
 ```{r}
 pred <-h2o.predict(saved_model, newdata = test_h2o)
 h2o.performance(h2o_model,test_h2o)
+```
+
+## New method 
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+path <- "WA_Fn-UseC_-HR-Employee-Attrition.csv"
+data <- fread(path)
+```
+
+```{r}
+
+#data$Attrition<-ifelse(data$Attrition=="Yes", 1, 0)
+# Create training (80%) and test (20%) sets for the 
+set.seed(430)
+split = createDataPartition(data$Attrition, p =0.8, list = FALSE)
+train = data[split, ]
+test = data[-split, ]
+```
+Convert to factor
+```{r}
+# all character columns to factor:
+train <- mutate_if(train, is.character, as.factor)
+```
+
+Clean the Near Zero Variance Variables.
+```{r}
+column_near_zero_var <-nearZeroVar(train)
+column_near_zero_var
+```
+
+```{r}
+train <- train[,-..column_near_zero_var]
+```
+
+With tree method, no need to standar scaler, remove null value, encoder (due to factor transform)...
+```{r}
+test <- mutate_if(test, is.character, as.factor)
+test <- test[,-..column_near_zero_var]
+```
+
+
+```{r}
+library(h2o)
+h2o.no_progress()
+h2o.init()
+```
+
+
+```{r}
+# convert training data to h2o object
+train_h2o <- as.h2o(train)
+test_h2o <- as.h2o(test)
+# set the response column to Sale_Price
+response <- "Attrition"
+n_features <- length(setdiff(names(train), "Attrition"))
+# set the predictor names
+predictors <- setdiff(colnames(train), response)
+```
+
+```{r}
+start_time <- lubridate::minute(Sys.time())
+h2o_model <- h2o.gbm(
+    x = predictors, 
+    y = response,
+    training_frame = train_h2o, 
+    seed = 123
+)
+end_time <- lubridate::minute(Sys.time())
+#h2o_model
+time <- (end_time - start_time)
+print(time)
+```
+
+```{r}
+# Apply h2o model to test set
+pred <-h2o.predict(h2o_model, newdata = test_h2o)
+h2o.performance(h2o_model,test_h2o)
+```
+
+```{r}
+# save the model
+model_path <- h2o.saveModel(object = h2o_model, path = getwd(), force = TRUE)
+print(model_path)
+```
+
+
+```{r}
+# load the model
+saved_model <- h2o.loadModel(model_path)
+```
+
+## Create data for predict
+```{r}
+train
+```
+
+
+```{r}
+MonthlyIncome <- c() 
+OverTime <- c()
+DailyRate <- c()
+MonthlyRate <- c()
+DistanceFromHome <- c()
+Age <- c()
+StockOptionLevel <- c()
+RelationshipSatisfaction <- c()
+```
+
+
+```{r}
+employ.data <- data.frame(MonthlyIncome, OverTime, DailyRate,MonthlyRate,DistanceFromHome,Age,
+                          StockOptionLevel,RelationshipSatisfaction)
+```
+
+```{r}
+employ.data <- mutate_if(employ.data, is.character, as.factor)
+employ.data <- employ.data[,-..column_near_zero_var]
+employ.data <- as.h2o(employ.data)
+```
+
+
+```{r}
+pred <-h2o.predict(saved_model, newdata = employ.data)
+pred
+```
+
+
+```{r}
 ```
 
 
