@@ -1,0 +1,93 @@
+---
+title: "Job attrition analtyic"
+author: "Nguyen Ngoc Duy"
+date: "Jan 9, 2021"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE,message = FALSE,warning = FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
+```
+
+```{r message = FALSE,warning = FALSE,include=FALSE}
+library(data.table)
+library(tidyverse)
+library(rsample)   # for data splitting
+library(h2o)
+library(caret)
+h2o.no_progress()
+h2o.init()
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+path <- "WA_Fn-UseC_-HR-Employee-Attrition.csv"
+data <- fread(path)
+# Create training (80%) and test (20%) sets for the 
+set.seed(430)
+split = createDataPartition(data$Attrition, p =0.8, list = FALSE)
+train = data[split, ]
+test = data[-split, ]
+# all character columns to factor:
+train <- mutate_if(train, is.character, as.factor)
+column_near_zero_var <-nearZeroVar(train)
+train <- train[,-..column_near_zero_var]
+test <- mutate_if(test, is.character, as.factor)
+test <- test[,-..column_near_zero_var]
+# convert training data to h2o object
+train_h2o <- as.h2o(train)
+test_h2o <- as.h2o(test)
+```
+## Plot categorical vs catagorical
+Compare Attirition percentage between business travel catagorical
+```{r}
+Categorical_vs_categorical_plot <- function(data,group_col,fill_col){
+data %>%
+  group_by_(group_col, fill_col) %>%
+  summarize(n = n()) %>% 
+  mutate(pct = n/sum(n),lbl = scales::percent(pct))%>% 
+  ggplot(aes_(x = group_col,y = ~pct,
+           fill = fill_col)) +
+  geom_bar(stat = "identity",
+           position = "fill") +
+  scale_y_continuous(breaks = seq(0, 1, .2),label =scales::percent) +
+  geom_text(aes(label = lbl), 
+            size = 3, 
+            position = position_stack(vjust = 0.5)) +
+  #scale_fill_brewer(palette = "Set2") +
+  labs(y = "Percent",x = "Attrition",title = "Compare attrition accross category")+
+  theme_minimal()  
+  
+}
+Categorical_vs_categorical_plot(data,~Attrition,~BusinessTravel)
+```
+
+## Plot Categorical vs. Quantitative
+
+Compare attrition between age
+```{r}
+Categorical_vs_quantitative_plot <- function(data,categorical_col,quantitative_col){
+  # plot the distribution using violin and boxplots
+  ggplot(data, aes_(x = categorical_col, 
+                     y = quantitative_col)) +
+  geom_violin(fill = "cornflowerblue") +
+  geom_boxplot(width = .2, 
+               fill = "orange",
+               outlier.color = "orange",
+               outlier.size = 2) 
+}
+Categorical_vs_quantitative_plot(data,~Attrition,~Age)
+```
+
+```{r}
+# load the model
+model_path <- "GBM_model_R_1610154635473_1"
+h2o_model <- h2o.loadModel(model_path)
+```
+
+## Variable important
+```{r}
+h2o.varimp_plot(h2o_model)
+```
+
+## Shap explain model
+```{r}
+h2o.shap_summary_plot(h2o_model,test_h2o)
+```

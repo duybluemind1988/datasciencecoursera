@@ -1,8 +1,11 @@
 library(data.table)
 library(tidyverse)
 library(shiny)
+library(scales)
+library(rsample) 
+library(caret)
 
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 path <- "WA_Fn-UseC_-HR-Employee-Attrition.csv"
 ui <- fluidPage(
   
@@ -11,8 +14,7 @@ ui <- fluidPage(
   sidebarLayout(
     
     sidebarPanel(
-      
-      
+      "This app was created for basic analytic job attrition"
     ), #endsidebarpanel
     
     mainPanel(
@@ -38,46 +40,37 @@ server <- function(input, output, session) {
   observeEvent(data(),updateSelectInput(session, "num_compare", 
                                         choices=names(data() %>% select_if(is.numeric)),selected='Age'))
   # Plot categorical vs catagorica
-  output$cat_vs_cat_chart<-renderPlot(
-    Categorical_vs_categorical_plot(data(),~Attrition,input$cat_compare)
-  )
-  
-  # Plot Categorical vs. Quantitative
-  output$cat_vs_num_chart<-renderPlot(
-    Categorical_vs_quantitative_plot(data(),~Attrition,input$num_compare)
-  )
-  
-  # Function
-  Categorical_vs_categorical_plot <- function(data,group_col,fill_col){
-    data %>%
-      group_by_(group_col, fill_col) %>%
+  output$cat_vs_cat_chart<-renderPlot({
+    #Categorical_vs_categorical_plot(data(),~Attrition,input$cat_compare)
+    data() %>%
+      group_by_(~Attrition, input$cat_compare) %>%
       summarize(n = n()) %>% 
-      mutate(pct = n/sum(n),lbl = scales::percent(pct))%>% 
-      ggplot(aes_(x = group_col,y = ~pct,
-                  fill = fill_col)) +
-      geom_bar(stat = "identity",
-               position = "fill") +
-      scale_y_continuous(breaks = seq(0, 1, .2),label =scales::percent) +
+      mutate(pct = n/sum(n),lbl = scales::percent(pct)) %>% 
+      ggplot(aes_string(x = "Attrition",y = "pct",
+                 fill = input$cat_compare)) + 
+      geom_bar(stat = "identity",position = "fill") +
+      scale_y_continuous(breaks = seq(0, 1, .2),label = percent) +
       geom_text(aes(label = lbl), 
                 size = 3, 
                 position = position_stack(vjust = 0.5)) +
-      #scale_fill_brewer(palette = "Set2") +
-      labs(y = "Percent",x = "Attrition",title = "Compare attrition accross category")+
-      theme_minimal()  
+      scale_fill_brewer(palette = "Set2") +
+      #labs(y = "Percent",fill = "Drive Train",x = "Class",title = "Automobile Drive by Class") +
+      theme_minimal() 
     
-  }
+  })
   
-  Categorical_vs_quantitative_plot <- function(data,categorical_col,quantitative_col){
+  # Plot Categorical vs. Quantitative
+  output$cat_vs_num_chart<-renderPlot({
+    #Categorical_vs_quantitative_plot(data(),~Attrition,input$num_compare)
     # plot the distribution using violin and boxplots
-    ggplot(data, aes_(x = categorical_col, 
-                      y = quantitative_col)) +
+    ggplot(data(), aes_string(x = "Attrition", 
+                      y = input$num_compare)) +
       geom_violin(fill = "cornflowerblue") +
       geom_boxplot(width = .2, 
                    fill = "orange",
                    outlier.color = "orange",
                    outlier.size = 2) 
-  }
-  
+  })
 }
 
 
