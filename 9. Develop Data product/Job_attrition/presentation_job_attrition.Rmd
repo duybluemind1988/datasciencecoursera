@@ -1,5 +1,5 @@
 ---
-title: "Job attrition analtyic"
+title: "Job attrition analytyic"
 author: "Nguyen Ngoc Duy"
 date: "Jan 9, 2021"
 output: ioslides_presentation
@@ -8,6 +8,16 @@ output: ioslides_presentation
 ```{r setup, include=FALSE,message = FALSE,warning = FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
 ```
+## Some information
+
+- Github link to shiniapp code, data file and presentation file:
+https://github.com/duybluemind1988/datasciencecoursera/tree/main/9.%20Develop%20Data%20product/Job_attrition
+
+- Job attrition instroduction:
+Uncover the factors that lead to employee attrition and explore important questions such as ‘show me a breakdown of distance from home by job role and attrition’ or ‘compare average monthly income by education and attrition’. This is a fictional data set created by IBM data scientists.
+
+- Link to Kaggle job attrition information:
+https://www.kaggle.com/pavansubhasht/ibm-hr-analytics-attrition-dataset
 
 ```{r message = FALSE,warning = FALSE,include=FALSE}
 library(data.table)
@@ -57,23 +67,6 @@ data %>%
   
 }
 Categorical_vs_categorical_plot(data,~Attrition,~BusinessTravel)
-```
-
-## Plot Categorical vs. Quantitative
-
-Compare attrition between age
-```{r}
-Categorical_vs_quantitative_plot <- function(data,categorical_col,quantitative_col){
-  # plot the distribution using violin and boxplots
-  ggplot(data, aes_(x = categorical_col, 
-                     y = quantitative_col)) +
-  geom_violin(fill = "cornflowerblue") +
-  geom_boxplot(width = .2, 
-               fill = "orange",
-               outlier.color = "orange",
-               outlier.size = 2) 
-}
-Categorical_vs_quantitative_plot(data,~Attrition,~Age)
 ```
 
 ```{r}
