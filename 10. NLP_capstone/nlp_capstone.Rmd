@@ -1,0 +1,114 @@
+---
+title: "Untitled"
+output: html_document
+---
+```{r}
+#install.packages("bigreadr")
+library(tidyverse)
+#library(data.table)
+#library(bigreadr)
+```
+
+
+```{r}
+#C:\Users\DNN\Data_science\Git\Data\Coursera-SwiftKey\final\en_US\en_US.news.txt
+us_twitter_path <-"C:/Users/DNN/Data_science/Git/Data/Coursera-SwiftKey/final/en_US/en_US.twitter.txt"
+us_news_path <-"C:/Users/DNN/Data_science/Git/Data/Coursera-SwiftKey/final/en_US/en_US.news.txt"
+us_blogs_path <-"C:/Users/DNN/Data_science/Git/Data/Coursera-SwiftKey/final/en_US/en_US.blogs.txt"
+```
+
+```{r}
+size<-file.info(us_blogs_path)
+kb<-size$size/1024
+mb<-kb/1024
+mb
+```
+
+```{r}
+nlines(us_twitter_path)
+nlines(us_news_path)
+nlines(us_blogs_path)
+```
+
+```{r}
+twitter <- readLines(con <- file(us_twitter_path), encoding = "UTF-8", skipNul = TRUE)
+length(twitter)
+```
+
+```{r}
+# Blogs file
+blogs<-file(us_blogs_path,"r")
+blogs_lines<-readLines(blogs)
+close(blogs)
+summary(nchar(blogs_lines))
+```
+```{r}
+# News file
+news<-file(us_news_path,"r")
+news_lines<-readLines(news)
+close(news)
+summary(nchar(news_lines))
+```
+
+
+```{r}
+# Twitter file
+twitter<-file(us_twitter_path,"r")
+twitter_lines<-readLines(twitter)
+close(twitter)
+summary(nchar(twitter_lines))
+```
+
+
+```{r}
+lovelines <- (grepl(" love ", readLines(us_twitter_path)))
+numlove <- table(lovelines)["TRUE"]
+
+hatelines <- (grepl(" hate ", readLines(us_twitter_path)))
+numhate <- table(hatelines)["TRUE"]
+
+proportion <- numlove/numhate
+
+proportion
+```
+
+
+```{r}
+twitter<-readLines(us_twitter_path)
+lineTarget <- grep("biostats",twitter)
+twitter[lineTarget]
+```
+
+
+```{r}
+grep("A computer once beat me at chess, but it was no match for me at kickboxing", twitter)
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
